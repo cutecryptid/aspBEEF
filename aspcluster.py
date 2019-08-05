@@ -2,6 +2,9 @@ import csv
 import argparse
 import clingo
 
+def printmodel(m):
+    print(str(m))
+
 def solve(asp_program, asp_facts, clingo_args):
     c = clingo.Control(clingo_args)
     if asp_program != "":
@@ -23,7 +26,7 @@ def solve_optimal(asp_program, asp_facts, clingo_args):
         c.add("base", [], facts)
     c.ground([("base", [])])
     ret = []
-    with c.solve(yield_=True) as handle:
+    with c.solve(on_model=printmodel, yield_=True) as handle:
         for m in handle:
             if (m.optimality_proven):
                 ret += [m.symbols(shown=True)]
@@ -53,25 +56,23 @@ def main():
                 if k == args.target:
                     asp_facts += "cluster({0}, '{1}'). ".format(i,v.replace('-','_').lower())
             asp_facts += "\n"
-
-    print(asp_facts)
     
-    # # Ad hoc selected parameters for iris dataset
-    # selected_parameters = "selattr('petal_width'). selattr('sepal_width')."
+    # Ad hoc selected parameters for iris dataset
+    selected_parameters = "selattr('petal_width'). selattr('sepal_width')."
 
-    # # Use -c selectcount=N to specify the number of dimensions of each rectangle
+    # Use -c selectcount=N to specify the number of dimensions of each rectangle
 
-    # # Specify the number of rectangles by changing the nrect value
-    # solutions = solve('rectangles_strict', [asp_facts, selected_parameters], ['-c nrect=2'])
+    # Specify the number of rectangles by changing the nrect value
+    solutions = solve_optimal('rectangles', [asp_facts, selected_parameters], ['-c nrect=2'])
 
-    # # Alternative method with optimization and such, Work In Progress
-    # #solutions = solve_optimal('rectangles', [asp_facts, selected_parameters], ['-c nrect=2'])
+    # Alternative method with optimization and such, Work In Progress
+    #solutions = solve_optimal('rectangles', [asp_facts, selected_parameters], ['-c nrect=2'])
 
-    # for sol in solutions:
-    #     for sym in sol:
-    #         if sym.name == "rectval":
-    #             args = sym.arguments 
-    #             #print("RECT {0} : {1} ({2}, {3})".format(args[0], args[1], args[2], args[3]))
+    for sol in solutions:
+        for sym in sol:
+            if sym.name == "rectval":
+                args = sym.arguments 
+                print("RECT {0} : {1} ({2}, {3})".format(args[0], args[1], args[2], args[3]))
 
 
 
