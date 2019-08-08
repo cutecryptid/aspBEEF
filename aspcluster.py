@@ -34,12 +34,12 @@ def build_html_reports(clingo_solutions, points, x_axis_parameter_name, y_axis_p
         os.mkdir(REPORT_DIR_NAME)
 
     # Copy reports dependencies
-    copy_tree(REPORT_TEMPLATE_DIR + REPORT_RESOURCES_DIRNAME, REPORT_DIR_NAME + REPORT_RESOURCES_DIRNAME)
+    copy_tree(REPORT_TEMPLATE_DIR_PATH + REPORT_RESOURCES_DIRNAME, REPORT_DIR_NAME + REPORT_RESOURCES_DIRNAME)
 
     # Load the templates
-    report_base_template  = open(REPORT_TEMPLATE_DIR + HTML_REPORT_TEMPLATE_FILENAME, 'r').read()
-    points_template       = open(REPORT_TEMPLATE_DIR + POINTS_TEMPLATE_FILENAME, 'r').read()
-    rectangle_template    = open(REPORT_TEMPLATE_DIR + RECTANGLE_TEMPLATE_FILENAME, 'r').read()
+    report_base_template  = open(REPORT_TEMPLATE_DIR_PATH + HTML_REPORT_TEMPLATE_FILENAME, 'r').read()
+    points_template       = open(REPORT_TEMPLATE_DIR_PATH + POINTS_TEMPLATE_FILENAME, 'r').read()
+    rectangle_template    = open(REPORT_TEMPLATE_DIR_PATH + RECTANGLE_TEMPLATE_FILENAME, 'r').read()
 
     # Generate points data from points_template
     points_data = ""

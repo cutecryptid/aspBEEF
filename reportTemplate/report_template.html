@@ -21,8 +21,8 @@
     <div class="container">
         <div class="h1 text-center">ASPCluster Report</div>
         <!-- Stats table -->
-        <div class="row justify-content-center text-center">
-            <div class="col-md-8">
+        <div class="col-md-12">
+            <div class="col-md-8" style="float:none; margin:auto">
                 <table class="table table-bordered">
                     <tbody>
                         <tr>
@@ -125,9 +125,9 @@
                         #chart_data#
                     ]
                 };
-
-                myChart.setOption(option);
                 var myChart = echarts.init(document.getElementById("chart"));
+                myChart.setOption(option);
+                
             </script>
         </div>
     </div>
