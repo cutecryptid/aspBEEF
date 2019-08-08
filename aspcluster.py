@@ -64,7 +64,7 @@ def build_reports(solutions, points, x_axis_parameter, y_axis_parameter):
                 outliercount = str(sym.arguments[0])
 
         # Generate clusters_data
-        clusters_data = ""
+        chart_data = ""
         for cluster, limits in clusters.items():
             cluster_data = rectangle_template.replace("#name#", cluster)
             cluster_data = cluster_data.replace("#x_low_limit#", limits['low'][x_axis_parameter])
@@ -72,10 +72,12 @@ def build_reports(solutions, points, x_axis_parameter, y_axis_parameter):
             cluster_data = cluster_data.replace("#y_low_limit#", limits['low'][y_axis_parameter])
             cluster_data = cluster_data.replace("#y_high_limit#", limits['high'][y_axis_parameter])
 
-            clusters_data += cluster_data
+            chart_data += cluster_data
+
+        chart_data = points_data + chart_data
 
         # Build report
-        report = report_base_template.replace("#chart_data#", clusters_data + points_data). \
+        report = report_base_template.replace("#chart_data#", chart_data). \
             replace("#overlapping#", overlapping). \
             replace("#outliercount#", outliercount). \
             replace("#x_axis_name#", x_axis_parameter). \
@@ -121,20 +123,20 @@ def solve_optimal(asp_program, asp_facts, clingo_args):
     return ret
 
 def main():
-    # Handling arguments
+    # Handling command line arguments
     parser = argparse.ArgumentParser(description='Experimental ASP clustering tool')
+    parser.add_argument('-r', '--report', action='store_true', default=False)
     parser.add_argument('file', type=str, help="CSV File")
     parser.add_argument('target', nargs='?', type=str, help="Target Classification Field if any")
-    #TODO: report option
     args = parser.parse_args()
 
     # Ad hoc selected parameters for iris dataset
     selected_parameters = ['sepal_width', 'petal_width']
 
-    # Csv data to ASP facts & points
+    # Csv data to ASP facts & points_data
     with open(args.file) as csvfile:
         asp_facts = ""
-        points = {}
+        points_data = {}
         if args.target:
             asp_facts += "target('{0}').\n".format(args.target)
         datareader = csv.DictReader(csvfile)
@@ -142,16 +144,16 @@ def main():
             asp_facts += "attribute('{0}'). ".format(att)
         asp_facts += "\n"
         for i,row in enumerate(datareader):
-            value = []
+            point = []
             for j,(k,v) in enumerate(row.items()):
                 if k in selected_parameters:
                     asp_facts += "value({0},'{1}',{2:d}). ".format(i,k,int(float(v)*FACTOR))
-                    value.append(v)
+                    point.append(v)
                 if k == args.target:
                     asp_facts += "cluster({0}, '{1}'). ".format(i,v.replace('-','_').lower())
-                    if v not in points:
-                        points[v] = []
-                    points[v].append(value)
+                    if v not in points_data:
+                        points_data[v] = []
+                    points_data[v].append(point)
             asp_facts += "\n"
     
     # selected parameters facts for asp
@@ -168,7 +170,9 @@ def main():
     #solutions = solve_optimal('rectangles', [asp_facts, selected_parameters], ['-c nrect=2'])
 
     # Generate an html report for each solution
-    build_reports(solutions, points, selected_parameters[0], selected_parameters[1])
+    if args.report:
+        build_reports(solutions, points_data, selected_parameters[0], selected_parameters[1])
+
 
 if __name__ == "__main__":
     main()
