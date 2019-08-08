@@ -4,20 +4,28 @@ import clingo
 import os
 from distutils.dir_util import copy_tree, remove_tree
 
-# HTML templates constants
-REPORT_TEMPLATE_DIR = "./reportTemplate/"  # Path of the html report templates
+# HTML templates configuration
+REPORT_TEMPLATE_DIR_PATH = "./reportTemplate/"
+REPORT_RESOURCES_DIRNAME = ".resources/"
 REPORT_DIR_NAME = "htmlReports/"
 HTML_REPORT_TEMPLATE_FILENAME = "report_template.html"
-CLASS_POINTS_TEMPLATE_FILENAME = "class_points_template.js"
+POINTS_TEMPLATE_FILENAME = "points_template.js"
 RECTANGLE_TEMPLATE_FILENAME = "rectangle_template.js"
 
 FACTOR = 10  # Experimental Fix to decimal numbers, probably have to deal with them dynamically
 
 
-"""
-    Generate an html report for each solution using the templates from REPORT_TEMPLATE_DIR
-"""
-def build_reports(solutions, points, x_axis_parameter, y_axis_parameter):
+def build_html_reports(clingo_solutions, points, x_axis_parameter_name, y_axis_parameter_name):
+    """Generates the html reports using tokens and templates
+
+    'points' must be a dictionary indexed by target class names and each value 
+    must be a list of points. 
+    Example -> {'Iris-setosa' : [[1,2],[2,3]], 'Iris-versicolor': [[3,2],[4,5]]}
+
+    This function supposes that clingo solutions contain 'rectval',
+    'overlapcount' and 'outliercount' facts.
+    """
+
     # Creates destination directory
     try:
         os.mkdir(REPORT_DIR_NAME)
@@ -25,28 +33,25 @@ def build_reports(solutions, points, x_axis_parameter, y_axis_parameter):
         remove_tree(REPORT_DIR_NAME)
         os.mkdir(REPORT_DIR_NAME)
 
-    # Copy report dependencies
-    copy_tree(REPORT_TEMPLATE_DIR + ".resources/", REPORT_DIR_NAME + ".resources/")
+    # Copy reports dependencies
+    copy_tree(REPORT_TEMPLATE_DIR + REPORT_RESOURCES_DIRNAME, REPORT_DIR_NAME + REPORT_RESOURCES_DIRNAME)
 
     # Load the templates
     report_base_template  = open(REPORT_TEMPLATE_DIR + HTML_REPORT_TEMPLATE_FILENAME, 'r').read()
-    class_points_template = open(REPORT_TEMPLATE_DIR + CLASS_POINTS_TEMPLATE_FILENAME, 'r').read()
+    points_template       = open(REPORT_TEMPLATE_DIR + POINTS_TEMPLATE_FILENAME, 'r').read()
     rectangle_template    = open(REPORT_TEMPLATE_DIR + RECTANGLE_TEMPLATE_FILENAME, 'r').read()
 
-    # Process base template
-    report_base_template = report_base_template.replace("#class_names#", str(list(points.keys())))
-
-    # Generate points data
+    # Generate points data from points_template
     points_data = ""
     for class_name, values in points.items():
-        points_data += class_points_template.replace("#className#", class_name).replace("#data#", str(values))
+        points_data += points_template.replace("#className#", class_name).replace("#data#", str(values))
 
-    # Generate each report
+    # Generate one report for each solution
     sol_n = 1
-    for sol in solutions:
-        print("\rGenerating html reports: " + str(sol_n) + "/" + str(len(solutions)), end='')  # Update progress
+    for sol in clingo_solutions:
+        print("\rGenerating html reports: " + str(sol_n) + "/" + str(len(clingo_solutions)), end='')  # Update progress
         
-        # Get clusters and stats from solution
+        # Get clusters data and solution stats from solution
         clusters = {}
         for sym in sol:
             if sym.name == "rectval":
@@ -67,21 +72,22 @@ def build_reports(solutions, points, x_axis_parameter, y_axis_parameter):
         chart_data = ""
         for cluster, limits in clusters.items():
             cluster_data = rectangle_template.replace("#name#", cluster)
-            cluster_data = cluster_data.replace("#x_low_limit#", limits['low'][x_axis_parameter])
-            cluster_data = cluster_data.replace("#x_high_limit#", limits['high'][x_axis_parameter])
-            cluster_data = cluster_data.replace("#y_low_limit#", limits['low'][y_axis_parameter])
-            cluster_data = cluster_data.replace("#y_high_limit#", limits['high'][y_axis_parameter])
+            cluster_data = cluster_data.replace("#x_low_limit#", limits['low'][x_axis_parameter_name])
+            cluster_data = cluster_data.replace("#x_high_limit#", limits['high'][x_axis_parameter_name])
+            cluster_data = cluster_data.replace("#y_low_limit#", limits['low'][y_axis_parameter_name])
+            cluster_data = cluster_data.replace("#y_high_limit#", limits['high'][y_axis_parameter_name])
 
             chart_data += cluster_data
 
         chart_data = points_data + chart_data
 
         # Build report
-        report = report_base_template.replace("#chart_data#", chart_data). \
+        report = report_base_template.replace("#class_names#", str(list(points.keys()))). \
+            replace("#chart_data#", chart_data). \
             replace("#overlapping#", overlapping). \
             replace("#outliercount#", outliercount). \
-            replace("#x_axis_name#", x_axis_parameter). \
-            replace("#y_axis_name#", y_axis_parameter)
+            replace("#x_axis_name#", x_axis_parameter_name). \
+            replace("#y_axis_name#", y_axis_parameter_name)
 
         # Generate report for actual solution
         report_file = open(REPORT_DIR_NAME + str(sol_n) + "_report.html", 'w+')
@@ -92,8 +98,10 @@ def build_reports(solutions, points, x_axis_parameter, y_axis_parameter):
 
     print("\nFinished. Reports were generated in '" + REPORT_DIR_NAME + "'")
 
+
 def print_model(m):
     print(str(m))
+
 
 def solve(asp_program, asp_facts, clingo_args):
     c = clingo.Control(clingo_args)
@@ -107,6 +115,7 @@ def solve(asp_program, asp_facts, clingo_args):
         for m in handle:
             ret += [m.symbols(shown=True)]
     return ret
+
 
 def solve_optimal(asp_program, asp_facts, clingo_args):
     c = clingo.Control(clingo_args + ["--opt-mode=optN"])
@@ -171,7 +180,7 @@ def main():
 
     # Generate an html report for each solution
     if args.report:
-        build_reports(solutions, points_data, selected_parameters[0], selected_parameters[1])
+        build_html_reports(solutions, points_data, selected_parameters[0], selected_parameters[1])
 
 
 if __name__ == "__main__":
