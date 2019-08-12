@@ -2,12 +2,15 @@ import csv
 import argparse
 import clingo
 import os
+import webbrowser
 from distutils.dir_util import copy_tree, remove_tree
 
 # HTML templates configuration
 REPORT_TEMPLATE_DIR_PATH = "./reportTemplate/"
 REPORT_RESOURCES_DIRNAME = ".resources/"
 REPORT_DIR_NAME = "htmlReports/"
+INDEX_PAGE_TEMPLATE_FILENAME = "index_template.html"
+INDEX_LIST_ELEMENT_TEMPLATE_FILENAME = "index_list_element_template.html"
 HTML_REPORT_TEMPLATE_FILENAME = "report_template.html"
 POINTS_TEMPLATE_FILENAME = "points_template.js"
 RECTANGLE_TEMPLATE_FILENAME = "rectangle_template.js"
@@ -48,9 +51,10 @@ def build_html_reports(clingo_solutions, points, x_axis_parameter_name, y_axis_p
 
     # Generate one report for each solution
     sol_n = 1
+    index_page_data = {}
     for sol in clingo_solutions:
         print("\rGenerating html reports: " + str(sol_n) + "/" + str(len(clingo_solutions)), end='')  # Update progress
-        
+        index_page_data[sol_n] = {}
         # Get clusters data and solution stats from solution
         clusters = {}
         for sym in sol:
@@ -65,8 +69,10 @@ def build_html_reports(clingo_solutions, points, x_axis_parameter_name, y_axis_p
                 clusters[cluster_name]['high'][str(args[1]).replace("'", '')] = str(args[3].number/FACTOR)
             elif sym.name == "overlapcount":
                 overlapping = str(sym.arguments[0])
+                index_page_data[sol_n]['overlapping'] = overlapping
             elif sym.name == "outliercount":
                 outliercount = str(sym.arguments[0])
+                index_page_data[sol_n]['outliercount'] = outliercount
 
         # Generate clusters_data
         chart_data = ""
@@ -82,21 +88,44 @@ def build_html_reports(clingo_solutions, points, x_axis_parameter_name, y_axis_p
         chart_data = points_data + chart_data
 
         # Build report
-        report = report_base_template.replace("#class_names#", str(list(points.keys()))). \
+        report = report_base_template.replace("#report_id#", str(sol_n)). \
+            replace("#class_names#", str(list(points.keys()))). \
             replace("#chart_data#", chart_data). \
             replace("#overlapping#", overlapping). \
             replace("#outliercount#", outliercount). \
             replace("#x_axis_name#", x_axis_parameter_name). \
             replace("#y_axis_name#", y_axis_parameter_name)
 
-        # Generate report for actual solution
+        # Write report file for actual solution
         report_file = open(REPORT_DIR_NAME + str(sol_n) + "_report.html", 'w+')
         report_file.write(report)
         report_file.close()
 
         sol_n += 1
 
-    print("\nFinished. Reports were generated in '" + REPORT_DIR_NAME + "'")
+    # Load index page templates
+    index_template = open(REPORT_TEMPLATE_DIR_PATH + INDEX_PAGE_TEMPLATE_FILENAME, 'r').read()
+    index_list_element_template = open(REPORT_TEMPLATE_DIR_PATH + INDEX_LIST_ELEMENT_TEMPLATE_FILENAME, 'r').read()
+
+    # Generate links to reports (html code)
+    links_to_reports_html = ""
+    for report_id, report_data in index_page_data.items():
+        links_to_reports_html += index_list_element_template.replace("#report_file_path#", str(report_id) + "_report.html"). \
+            replace("#report_id#", str(report_id)). \
+            replace("#overlapping#", str(report_data['overlapping'])). \
+            replace("#outliercount#", str(report_data['outliercount']))
+
+    # Build index page
+    index_page = index_template.replace("#link_list_items#", links_to_reports_html)
+
+    # Write report index page
+    index_page_file = open(REPORT_DIR_NAME + "index.html", "w+")
+    index_page_file.write(index_page)
+    index_page_file.close()    
+
+    print("\nFinished. Reports were generated in '" + REPORT_DIR_NAME + "'. Opening index.html in the default browser...")
+    webbrowser.open_new(REPORT_DIR_NAME + "index.html")
+    print()
 
 
 def print_model(m):
