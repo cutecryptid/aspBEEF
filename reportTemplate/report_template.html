@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<!-- This html page is a template for the html reports of aspcluster.py
+    TOKENS:
+        #report_id#: replace with the id/name of the report.
+        #overlapping#: the overlapping metric value.
+        #outliercount#: the outliercount metric value.
+        #class_names#: list of the different class names of the dataset. Ex: ['Iris-setosa', 'Iris-versicolor']
+        #x_axis_name# and #y_axis_name#: names of the data features used.
+        #chart_data#: points and rectangles data following 'echarts' format. References:
+            (https://echarts.apache.org/en/option.html#series-scatter)
+            (https://echarts.apache.org/examples/en/editor.html?c=scatter-weight)
+-->
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href=".resources/bootstrap.min.css">
+    <script src=".resources/echarts.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="h1 text-center">ASPCluster Report #report_id#</div>
+        <!-- Stats table -->
+        <div class="col-md-12">
+            <div class="col-md-8" style="float:none; margin:auto">
+                <table class="table table-bordered">
+                    <tbody>
+                        <tr>
+                            <th scope="row">Overlapping</th>
+                            <td>#overlapping#</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Outliers</th>
+                            <td>#outliercount#</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- Clustering chart -->
+        <div class="row">
+            <div id="chart" style="height: 800px" class="col-sm-12 thumbnail" ></div>
+            <script type="text/javascript">
+                option = {
+                    /*
+                    title : {
+                        text: 'Resultado clustering',
+                        subtext: 'dataset: iris dataset'
+                    },
+                    */
+                    
+                    grid: {
+                        left: '3%',
+                        right: '7%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    tooltip : {
+                        // trigger: 'axis',
+                        showDelay : 0,
+                        formatter : function (params) {
+                            if (params.value.length > 1) {
+                                return params.seriesName + ' :<br/>'
+                                + params.value[0] + 'cm '
+                                + params.value[1] + 'cm ';
+                            }
+                            else {
+                                return params.seriesName + ' :<br/>'
+                                + params.name + ' : '
+                                + params.value + 'cm ';
+                            }
+                        },
+                        axisPointer:{
+                            show: true,
+                            type : 'cross',
+                            lineStyle: {
+                                type : 'dashed',
+                                width : 1
+                            }
+                        }
+                    },                    
+                    
+                    toolbox: {
+                        feature: {
+                            dataZoom: {},
+                            brush: {
+                                type: ['rect', 'polygon', 'clear']
+                            }
+                        }
+                    },
+                    brush: {
+                    },
+                    legend: {
+                        data: #class_names#,
+                        left: 'center'
+                    },
+                    xAxis : [
+                        {
+                            name: '#x_axis_name#',
+                            type : 'value',
+                            scale:true,
+                            axisLabel : {
+                                formatter: '{value} cm'
+                            },
+                            splitLine: {
+                                show: false
+                            }
+                        }
+                    ],
+                    yAxis : [
+                        {
+                            name: '#y_axis_name#',
+                            type : 'value',
+                            scale:true,
+                            axisLabel : {
+                                formatter: '{value} cm'
+                            },
+                            splitLine: {
+                                show: false
+                            }
+                        }
+                    ],
+                    
+                    series : [
+                        #chart_data#
+                    ]
+                };
+                var myChart = echarts.init(document.getElementById("chart"));
+                myChart.setOption(option);
+                
+            </script>
+        </div>
+    </div>
+</body>
+</html>
