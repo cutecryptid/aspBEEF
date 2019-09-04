@@ -29,12 +29,16 @@ inliercount(I,N) :- value(I,A,V), N=#count{ R: rectinlier(R,I) }.
 overlapcount(C) :- C=#sum{ N,I : inliercount(I,N), N > 1 }.
 outliercount(O) :- O=#count{ I : outlier(I) }.
 
+%rectsize(R, S) :- rectangle(R), S=#sum{ |V0-V1|,A : rectval(R,A,V0,V1) }.
+
 :- rectangle(R), rectinliercount(R, 0).
 
 #minimize{ OU: outliercount(OU) }.
 #minimize{ OV: overlapcount(OV) }.
+%#minimize{ R,S: rectsize(R, S)}.
 
 #show rectval/4.
 #show overlapcount/1.
 #show outliercount/1.
+%#show rectsize/2.
 

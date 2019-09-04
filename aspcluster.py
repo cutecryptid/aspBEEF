@@ -163,13 +163,19 @@ def solve_optimal(asp_program, asp_facts, clingo_args):
 def main():
     # Handling command line arguments
     parser = argparse.ArgumentParser(description='Experimental ASP clustering tool')
-    parser.add_argument('-r', '--report', action='store_true', default=False)
     parser.add_argument('file', type=str, help="CSV File")
     parser.add_argument('target', nargs='?', type=str, help="Target Classification Field if any")
+    parser.add_argument('-f', '--features', type=int, default=2, help="Number of features used")
+    parser.add_argument('-s', '--selfeatures', type=str, nargs='*', help="Selected features by name")
+    parser.add_argument('-n', '--nrect', type=int, default=2, help="Number of clusters")
+    parser.add_argument('-r', '--report', action='store_true', default=False)
     args = parser.parse_args()
 
     # Ad hoc selected parameters for iris dataset
-    selected_parameters = ['sepal_width', 'petal_width']
+    if args.selfeatures:
+        selected_parameters = args.selfeatures
+    else:
+        selected_parameters = []
 
     # Csv data to ASP facts & points_data
     with open(args.file) as csvfile:
@@ -200,15 +206,16 @@ def main():
         asp_selected_parameters += "selattr('" + parameter + "')."
 
     # Use -c selectcount=N to specify the number of dimensions of each rectangle
-
     # Specify the number of rectangles by changing the nrect value
-    solutions = solve('rectangles', [asp_facts, asp_selected_parameters], ['-c nrect=2'])
+    options = ['-c nrect=' + str(args.nrect)]
+    options += ['-c selectcount=' + str(max(len(selected_parameters), args.features))]
 
-    # Alternative method with optimization and such, Work In Progress
-    #solutions = solve_optimal('rectangles', [asp_facts, selected_parameters], ['-c nrect=2'])
+    solutions = solve_optimal('rectangles', [asp_facts, asp_selected_parameters], options)
 
     # Generate an html report for each solution
     if args.report:
+        # TODO: selected parameters must be known beforehand
+        #       only generate reports for optimals
         build_html_reports(solutions, points_data, selected_parameters[0], selected_parameters[1])
 
 
