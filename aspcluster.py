@@ -18,7 +18,7 @@ RECTANGLE_TEMPLATE_FILENAME = "rectangle_template.js"
 FACTOR = 10  # Experimental Fix to decimal numbers, probably have to deal with them dynamically
 
 
-def build_html_reports(clingo_solutions, points, x_axis_parameter_name, y_axis_parameter_name):
+def build_html_reports(clingo_solutions, points, features):
     """Generates the html reports using tokens and templates
 
     'points' must be a dictionary indexed by target class names and each value 
@@ -57,6 +57,7 @@ def build_html_reports(clingo_solutions, points, x_axis_parameter_name, y_axis_p
         index_page_data[sol_n] = {}
         # Get clusters data and solution stats from solution
         clusters = {}
+        params = []
         for sym in sol:
             if sym.name == "rectval":
                 args = sym.arguments  # 0: rectangle id | 1: parameter | 2: low limit | 3: high limit 
@@ -73,6 +74,14 @@ def build_html_reports(clingo_solutions, points, x_axis_parameter_name, y_axis_p
             elif sym.name == "outliercount":
                 outliercount = str(sym.arguments[0])
                 index_page_data[sol_n]['outliercount'] = outliercount
+            elif sym.name == "selattr":
+                params += [str(sym.arguments[0])]
+
+        param1_index = features.index(params[0][1:-1])
+        param2_index = features.index(params[1][1:-1])
+
+        x_axis_parameter_name = features[min(param1_index, param2_index)]
+        y_axis_parameter_name = features[max(param1_index, param2_index)]
 
         # Generate clusters_data
         chart_data = ""
@@ -113,7 +122,9 @@ def build_html_reports(clingo_solutions, points, x_axis_parameter_name, y_axis_p
         links_to_reports_html += index_list_element_template.replace("#report_file_path#", str(report_id) + "_report.html"). \
             replace("#report_id#", str(report_id)). \
             replace("#overlapping#", str(report_data['overlapping'])). \
-            replace("#outliercount#", str(report_data['outliercount']))
+            replace("#outliercount#", str(report_data['outliercount'])). \
+            replace("#x_axis_name#", x_axis_parameter_name). \
+            replace("#y_axis_name#", y_axis_parameter_name)
 
     # Build index page
     index_page = index_template.replace("#link_list_items#", links_to_reports_html)
@@ -168,7 +179,9 @@ def main():
     parser.add_argument('-f', '--features', type=int, default=2, help="Number of features used")
     parser.add_argument('-s', '--selfeatures', type=str, nargs='*', help="Selected features by name")
     parser.add_argument('-n', '--nrect', type=int, default=2, help="Number of clusters")
+    parser.add_argument('-c', '--solcount', type=int, default=10, help="Number of reported optimal solutions")
     parser.add_argument('-r', '--report', action='store_true', default=False)
+
     args = parser.parse_args()
 
     # Ad hoc selected parameters for iris dataset
@@ -177,6 +190,7 @@ def main():
     else:
         selected_parameters = []
 
+    csv_features = []
     # Csv data to ASP facts & points_data
     with open(args.file) as csvfile:
         asp_facts = ""
@@ -184,20 +198,22 @@ def main():
         if args.target:
             asp_facts += "target('{0}').\n".format(args.target)
         datareader = csv.DictReader(csvfile)
+
+        csv_features = list(datareader.fieldnames)
         for att in datareader.fieldnames:
             asp_facts += "attribute('{0}'). ".format(att)
         asp_facts += "\n"
         for i,row in enumerate(datareader):
             point = []
             for j,(k,v) in enumerate(row.items()):
-                if k in selected_parameters:
-                    asp_facts += "value({0},'{1}',{2:d}). ".format(i,k,int(float(v)*FACTOR))
-                    point.append(v)
                 if k == args.target:
                     asp_facts += "cluster({0}, '{1}'). ".format(i,v.replace('-','_').lower())
                     if v not in points_data:
                         points_data[v] = []
                     points_data[v].append(point)
+                else:
+                    asp_facts += "value({0},'{1}',{2:d}). ".format(i,k,int(float(v)*FACTOR))
+                    point.append(v)
             asp_facts += "\n"
     
     # selected parameters facts for asp
@@ -207,16 +223,16 @@ def main():
 
     # Use -c selectcount=N to specify the number of dimensions of each rectangle
     # Specify the number of rectangles by changing the nrect value
-    options = ['-c nrect=' + str(args.nrect)]
+    options = [args.solcount]
+    options += ['-c nrect=' + str(args.nrect)]
     options += ['-c selectcount=' + str(max(len(selected_parameters), args.features))]
 
     solutions = solve_optimal('rectangles', [asp_facts, asp_selected_parameters], options)
 
     # Generate an html report for each solution
     if args.report:
-        # TODO: selected parameters must be known beforehand
-        #       only generate reports for optimals
-        build_html_reports(solutions, points_data, selected_parameters[0], selected_parameters[1])
+        # TODO: only generate reports for optimals
+        build_html_reports(solutions, points_data, csv_features)
 
 
 if __name__ == "__main__":

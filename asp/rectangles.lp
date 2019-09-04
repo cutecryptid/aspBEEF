@@ -40,5 +40,6 @@ outliercount(O) :- O=#count{ I : outlier(I) }.
 #show rectval/4.
 #show overlapcount/1.
 #show outliercount/1.
+#show selattr/1.
 %#show rectsize/2.
 
