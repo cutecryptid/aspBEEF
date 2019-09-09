@@ -44,10 +44,6 @@ def build_html_reports(clingo_solutions, points, features):
     points_template       = open(REPORT_TEMPLATE_DIR_PATH + POINTS_TEMPLATE_FILENAME, 'r').read()
     rectangle_template    = open(REPORT_TEMPLATE_DIR_PATH + RECTANGLE_TEMPLATE_FILENAME, 'r').read()
 
-    # Generate points data from points_template
-    points_data = ""
-    for class_name, values in points.items():
-        points_data += points_template.replace("#className#", class_name).replace("#data#", str(values))
 
     # Generate one report for each solution
     sol_n = 1
@@ -55,6 +51,7 @@ def build_html_reports(clingo_solutions, points, features):
     for sol in clingo_solutions:
         print("\rGenerating html reports: " + str(sol_n) + "/" + str(len(clingo_solutions)), end='')  # Update progress
         index_page_data[sol_n] = {}
+        
         # Get clusters data and solution stats from solution
         clusters = {}
         params = []
@@ -76,12 +73,22 @@ def build_html_reports(clingo_solutions, points, features):
                 index_page_data[sol_n]['outliercount'] = outliercount
             elif sym.name == "selattr":
                 params += [str(sym.arguments[0])]
-
+        
         param1_index = features.index(params[0][1:-1])
         param2_index = features.index(params[1][1:-1])
 
-        x_axis_parameter_name = features[min(param1_index, param2_index)]
-        y_axis_parameter_name = features[max(param1_index, param2_index)]
+        x_axis_index = min(param1_index, param2_index)
+        y_axis_index = max(param1_index, param2_index)
+
+        x_axis_parameter_name = features[x_axis_index]
+        y_axis_parameter_name = features[y_axis_index]
+
+
+        # Generate points data from points_template
+        points_data = ""
+        for class_name, values in points.items():
+            filtered_values = [[v[x_axis_index], v[y_axis_index]] for v in values]
+            points_data += points_template.replace("#className#", class_name).replace("#data#", str(filtered_values))
 
         # Generate clusters_data
         chart_data = ""
@@ -190,6 +197,12 @@ def main():
     else:
         selected_parameters = []
 
+    feature_count = max(len(selected_parameters), args.features)
+
+    if feature_count != 2 and args.report:
+        raise SystemExit('Error: When reporting, only 2 features are supported')
+
+
     csv_features = []
     # Csv data to ASP facts & points_data
     with open(args.file) as csvfile:
@@ -225,7 +238,7 @@ def main():
     # Specify the number of rectangles by changing the nrect value
     options = [args.solcount]
     options += ['-c nrect=' + str(args.nrect)]
-    options += ['-c selectcount=' + str(max(len(selected_parameters), args.features))]
+    options += ['-c selectcount=' + str(feature_count)]
 
     solutions = solve_optimal('rectangles', [asp_facts, asp_selected_parameters], options)
 
