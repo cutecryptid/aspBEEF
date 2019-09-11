@@ -15,7 +15,8 @@ HTML_REPORT_TEMPLATE_FILENAME = "report_template.html"
 POINTS_TEMPLATE_FILENAME = "points_template.js"
 RECTANGLE_TEMPLATE_FILENAME = "rectangle_template.js"
 
-FACTOR = 10  # Experimental Fix to decimal numbers, probably have to deal with them dynamically
+ # Experimental Fix to decimal numbers, probably have to deal with them dynamically
+FACTOR = 100
 
 
 def build_html_reports(clingo_solutions, points, features):
@@ -201,6 +202,9 @@ def main():
 
     if feature_count != 2 and args.report:
         raise SystemExit('Error: When reporting, only 2 features are supported')
+    if feature_count < 2:
+        raise SystemExit('Error: Must use more than 2 features for clustering')
+
 
 
     csv_features = []
