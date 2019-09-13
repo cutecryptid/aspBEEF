@@ -18,16 +18,17 @@ RECTANGLE_TEMPLATE_FILENAME = "rectangle_template.js"
  # Experimental Fix to decimal numbers, probably have to deal with them dynamically
 FACTOR = 100
 
+# Global variables
 points = None 
 csv_features = None
-links_to_reports_html = None
+index_page_data = {}
+sol_n = 0
+x_axis_parameter_name = None
+y_axis_parameter_name = None
 
-def print_global():
-    print(points)
-    print(csv_features)
 
 def init_directory():
-        # Creates destination directory
+    # Creates destination directory
     try:
         os.mkdir(REPORT_DIR_NAME)
     except FileExistsError:
@@ -37,7 +38,22 @@ def init_directory():
     # Copy reports dependencies
     copy_tree(REPORT_TEMPLATE_DIR_PATH + REPORT_RESOURCES_DIRNAME, REPORT_DIR_NAME + REPORT_RESOURCES_DIRNAME)
 
+
 def build_index():
+    # Load index page templates
+    index_template = open(REPORT_TEMPLATE_DIR_PATH + INDEX_PAGE_TEMPLATE_FILENAME, 'r').read()
+    index_list_element_template = open(REPORT_TEMPLATE_DIR_PATH + INDEX_LIST_ELEMENT_TEMPLATE_FILENAME, 'r').read()
+
+    # Generate links to reports (html code)
+    links_to_reports_html = ""
+    for report_id, report_data in index_page_data.items():
+        links_to_reports_html += index_list_element_template.replace("#report_file_path#", str(report_id) + "_report.html"). \
+            replace("#report_id#", str(report_id)). \
+            replace("#overlapping#", str(report_data['overlapping'])). \
+            replace("#outliercount#", str(report_data['outliercount'])). \
+            replace("#x_axis_name#", x_axis_parameter_name). \
+            replace("#y_axis_name#", y_axis_parameter_name)
+
     # Build index page
     index_page = index_template.replace("#link_list_items#", links_to_reports_html)
 
@@ -49,6 +65,7 @@ def build_index():
     print("\nFinished. Reports were generated in '" + REPORT_DIR_NAME + "'. Opening index.html in the default browser...")
     webbrowser.open_new(REPORT_DIR_NAME + "index.html")
     print()
+
 
 def build_html_report(clingo_solution):
     """Generates the html reports using tokens and templates
@@ -68,8 +85,9 @@ def build_html_report(clingo_solution):
 
 
     # Generate one report for each solution
-    sol_n = 1
-    index_page_data = {}
+    global sol_n
+    sol_n += 1
+    global index_page_data
     index_page_data[sol_n] = {}
     
     # Get clusters data and solution stats from solution
@@ -100,7 +118,9 @@ def build_html_report(clingo_solution):
     x_axis_index = min(param1_index, param2_index)
     y_axis_index = max(param1_index, param2_index)
 
+    global x_axis_parameter_name
     x_axis_parameter_name = csv_features[x_axis_index]
+    global y_axis_parameter_name
     y_axis_parameter_name = csv_features[y_axis_index]
 
 
@@ -137,25 +157,9 @@ def build_html_report(clingo_solution):
     report_file.write(report)
     report_file.close()
 
-    # Load index page templates
-    index_template = open(REPORT_TEMPLATE_DIR_PATH + INDEX_PAGE_TEMPLATE_FILENAME, 'r').read()
-    index_list_element_template = open(REPORT_TEMPLATE_DIR_PATH + INDEX_LIST_ELEMENT_TEMPLATE_FILENAME, 'r').read()
-
-    # Generate links to reports (html code)
-
-    global links_to_reports_html
-    links_to_reports_html = ""
-    for report_id, report_data in index_page_data.items():
-        links_to_reports_html += index_list_element_template.replace("#report_file_path#", str(report_id) + "_report.html"). \
-            replace("#report_id#", str(report_id)). \
-            replace("#overlapping#", str(report_data['overlapping'])). \
-            replace("#outliercount#", str(report_data['outliercount'])). \
-            replace("#x_axis_name#", x_axis_parameter_name). \
-            replace("#y_axis_name#", y_axis_parameter_name)
-
 
 def print_build_model(m):
-    print(str(m))
+    print(str(m) + "\n")
     build_html_report(m)
 
 
