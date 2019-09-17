@@ -35,17 +35,19 @@ minrectval(R,A,V0,V1) :- rectattr(R, A), V0=#min{ V : rectinlier(R,I), value(I,A
 maxclustercount(R,M) :- rectangle(R), M=#max{ C : clustercount(R,CL,C) }.
 dominantcluster(R, CL) :- clustercount(R, CL, M), maxclustercount(R, M).
 impure(R) :-  maxclustercount(R,M), rectinliercount(R,N), N!=M.
+
+overlapcount(C) :- C=#sum{ N,I : inliercount(I,N), N > 1 }.
 outliercount(O) :- O=#count{ I : outlier(I) }.
 
 :- rectangle(R), rectinliercount(R, 0).
 :- class(CL), not dominantcluster(_, CL).
 
-:- inliercount(I,N), N > 1.
+:- outliercount(N), N > 0.
 :- impure(I).
 
-#minimize{ OU: outliercount(OU) }.
+#minimize{ OU: overlapcount(OU) }.
 
-overlapcount(0).
+outliercount(0).
 
 #show selattr/1.
 #show rectattr/2.
