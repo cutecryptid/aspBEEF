@@ -95,7 +95,7 @@ def build_html_report(clingo_solution):
     params = []
     for sym in clingo_solution.symbols(shown=True):
         if sym.name == "minrectval":
-            args = sym.arguments  # 0: rectangle id | 1: parameter | 2: low limit | 3: high limit 
+            args = sym.arguments  # 0: rectangle id | 1: parameter | 2: point
             cluster_name = 'cluster' + str(args[0])
             if cluster_name not in clusters:
                 clusters[cluster_name] = {}
@@ -157,13 +157,15 @@ def build_html_report(clingo_solution):
     report_file.write(report)
     report_file.close()
 
+def print_model(m):
+    print(str(m) + "\n")
 
 def print_build_model(m):
     print(str(m) + "\n")
     build_html_report(m)
 
 
-def solve(asp_program, asp_facts, clingo_args):
+def solve(asp_program, asp_facts, clingo_args, report=False):
     c = clingo.Control(clingo_args)
     if asp_program != "":
         c.load("./asp/"+asp_program+".lp")
@@ -171,13 +173,18 @@ def solve(asp_program, asp_facts, clingo_args):
         c.add("base", [], facts)
     c.ground([("base", [])])
     ret = []
-    with c.solve(on_model=print_build_model, yield_=True) as handle:
-        for m in handle:
-            ret += [m.symbols(shown=True)]
+    if report:
+        with c.solve(on_model=print_build_model, yield_=True) as handle:
+            for m in handle:
+                ret += [m.symbols(shown=True)]
+    else:
+        with c.solve(on_model=print_model, yield_=True) as handle:
+            for m in handle:
+                ret += [m.symbols(shown=True)]
     return ret
 
 
-def solve_optimal(asp_program, asp_facts, clingo_args):
+def solve_optimal(asp_program, asp_facts, clingo_args, report=False):
     c = clingo.Control(clingo_args + ["--opt-mode=optN"])
     if asp_program != "":
         c.load("./asp/"+asp_program+".lp")
@@ -185,10 +192,16 @@ def solve_optimal(asp_program, asp_facts, clingo_args):
         c.add("base", [], facts)
     c.ground([("base", [])])
     ret = []
-    with c.solve(on_model=print_build_model, yield_=True) as handle:
-        for m in handle:
-            if (m.optimality_proven):
-                ret += [m.symbols(shown=True)]
+    if report:
+        with c.solve(on_model=print_build_model, yield_=True) as handle:
+            for m in handle:
+                if (m.optimality_proven):
+                    ret += [m.symbols(shown=True)]
+    else:
+        with c.solve(on_model=print_build_model, yield_=True) as handle:
+            for m in handle:
+                if (m.optimality_proven):
+                    ret += [m.symbols(shown=True)]
     return ret
 
 def main():
@@ -216,8 +229,6 @@ def main():
         raise SystemExit('Error: When reporting, only 2 features are supported')
     if feature_count < 2:
         raise SystemExit('Error: Must use more than 2 features for clustering')
-
-
 
     global csv_features
     global points
@@ -257,11 +268,13 @@ def main():
     options += ['-c nrect=' + str(args.nrect)]
     options += ['-c selectcount=' + str(feature_count)]
 
-    init_directory()
+    if args.report:
+        init_directory()
 
-    solutions = solve_optimal('rectangles_strict', [asp_facts, asp_selected_parameters], options)
+    solutions = solve_optimal('rectangles_alter', [asp_facts, asp_selected_parameters], options, report=args.report)
 
-    build_index()
+    if args.report:
+        build_index()
 
 
 if __name__ == "__main__":

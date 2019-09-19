@@ -50,8 +50,8 @@ outliercount(O) :- O=#count{ I : outlier(I) }.
 outliercount(0).
 
 #show selattr/1.
-#show rectattr/2.
 #show minrectval/4.
 #show overlapcount/1.
 #show outliercount/1.
 #show impure/1.
+#show impurity/3.
