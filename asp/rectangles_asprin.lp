@@ -29,7 +29,12 @@ impure(R) :- rectangle(R), rectinlier(R,I1), rectinlier(R,I2), I1 < I2,
                 cluster(I1, C1), cluster(I2, C2), C1 != C2.
 
 % Given an impure rectangle and a cluster, how many points are not of that cluster
-impurity(R,CL1,IC) :- impure(R), cluster(CL1), IC=#count{ I: cluster(I, CL2), CL2 != CL1 }.
+impurity(R,CL1,IC) :- impure(R), cluster(CL1), 
+            IC=#count{ I: cluster(I, CL2), CL2 != CL1, rectinlier(R,I) }.
+% The minimal number of impurity determines the purest cluster of a rectangle
+impurity(R,M) :- impure(R), M=#min{ CLI : impurity(R,CL,CLI)}.
+% Suming up the number of impure points for all rectangles we obtain the overall impurity
+%impurity(I) :- I=#sum{ M,R : impurity(R,M) }.
 
 
 minrectval(R,A,V0,V1) :- rectangle(R), selattr(A), V0=#min{ V : rectinlier(R,I), value(I,A,V) },
@@ -40,6 +45,7 @@ minrectval(R,A,V0,V1) :- rectangle(R), selattr(A), V0=#min{ V : rectinlier(R,I),
 outliercount(C) :- C=#count{ I : outlier(I) }.
 overlapcount(C) :- overlaps(R1, R2), C=#count{ I : rectinlier(R1, I), rectinlier(R2, I) }.
 
+% Overlap metric doesn't measure well
 #preference(overlap, less(cardinality)){
     overlaps(R1, R2) : rectangle(R1), rectangle(R2)
 }.
@@ -47,7 +53,7 @@ overlapcount(C) :- overlaps(R1, R2), C=#count{ I : rectinlier(R1, I), rectinlier
     outlier(I) : pointid(I)
 }.
 #preference(impurity, less(weight)){
-    IC,CL,R :: impurity(R,CL,IC)
+    I,R :: impurity(R,I)
 }.
 #preference(all, pareto){
     **overlap; **outlier; **impurity
@@ -58,4 +64,5 @@ overlapcount(C) :- overlaps(R1, R2), C=#count{ I : rectinlier(R1, I), rectinlier
 #show minrectval/4.
 #show overlapcount/1.
 #show outliercount/1.
-#show impurity/3.
+#show impurity/2.
+#show rectinliercount/2.
