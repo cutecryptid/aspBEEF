@@ -271,7 +271,7 @@ def main():
     if args.report:
         init_directory()
 
-    solutions = solve_optimal('rectangles_alter', [asp_facts, asp_selected_parameters], options, report=args.report)
+    solutions = solve_optimal('rectangles', [asp_facts, asp_selected_parameters], options, report=args.report)
 
     if args.report:
         build_index()

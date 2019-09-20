@@ -3,57 +3,53 @@
 
 rectangle(1..nrect).
 
-valueid(I) :- value(I,_,_).
+pointid(I) :- value(I,A,V).
+attribute(A) :- value(I, A, V).
+cluster(CL) :- cluster(I,CL).
 
 selectcount { selattr(A):attribute(A) } selectcount.
 
-rectattr(R,A) :- rectangle(R), selattr(A).
+2 { rectval(R,A,V) : value(_,A,V) } 2 :- rectangle(R), selattr(A).
 
-attrval(A,V) :- value(_,A,V).
-
-class(C) :- cluster(_,C).
-
-1 { rectval(R,A,V0,V1) : attrval(A,V0), attrval(A,V1), V0 < V1} 1 :- rectattr(R,A).
-
-rectsize(R, S) :- rectangle(R), S=#sum{ |V1-V0|,A : rectval(R,A,V0,V1), rectattr(R,A) }.
-
-attrinlier(R,I,A) :- value(I,A,V), rectval(R,A,V0,V1), V >= V0, V <= V1.
-attroutlier(R,I,A) :- value(I,A,V), rectval(R,A,V0,V1), V < V0.
-attroutlier(R,I,A) :- value(I,A,V), rectval(R,A,V0,V1), V > V1.
+attrinlier(R,I,A) :- value(I,A,V), rectval(R,A,V0), rectval(R,A,V1), V >= V0, V <= V1, V0 < V1.
+attroutlier(R,I,A) :- value(I,A,V), rectval(R,A,V0), rectval(R,A,V1), V < V0, V0 < V1.
+attroutlier(R,I,A) :- value(I,A,V), rectval(R,A,V0), rectval(R,A,V1), V > V1, V0 < V1.
 
 rectoutlier(R, I) :- attroutlier(R,I,A).
 rectinlier(R, I) :- attrinlier(R,I,A), not rectoutlier(R,I).
 
+rectinliercount(R,C) :- rectangle(R), C=#count{ I : rectinlier(R,I) }.
+
 inlier(I) :- rectinlier(R, I).
-outlier(I) :- valueid(I), not inlier(I).
+outlier(I) :- pointid(I), not inlier(I).
 
-rectinliercount(R,N) :- rectangle(R), N=#count{ I : rectinlier(R,I) }.
-inliercount(I,N) :- value(I,A,V), N=#count{ R: rectinlier(R,I) }.
-clustercount(R,CL,C) :- rectangle(R), class(CL), C=#count{ I : rectinlier(R,I), cluster(I,CL) }.
+outliercount(C) :- C=#count{ I : outlier(I) }.
 
-maxclustercount(R,M) :- rectangle(R), M=#max{ C : clustercount(R,CL,C) }.
-dominantcluster(R, CL) :- clustercount(R, CL, M), maxclustercount(R, M).
-impurity(R,N-M) :-  maxclustercount(R,M), rectinliercount(R,N).
+overlaps(R1, R2) :- rectinlier(R1, I), rectinlier(R2, I), R1 < R2.
+overlapcount(C) :- overlaps(R1, R2), C=#count{ I : rectinlier(R1, I), rectinlier(R2, I) }.
+overlapcount(0) :- rectangle(R1), rectangle(R2), not overlaps(R1,R2).
 
-overlapcount(C) :- C=#sum{ N,I : inliercount(I,N), N > 1 }.
-outliercount(O) :- O=#count{ I : outlier(I) }.
+impure(R) :- rectangle(R), rectinlier(R,I1), rectinlier(R,I2), I1 < I2,
+                cluster(I1, C1), cluster(I2, C2), C1 != C2.
 
-:- rectangle(R), rectinliercount(R, 0).
-:- class(CL), not dominantcluster(_, CL).
+% Given an impure rectangle and a cluster, how many points are not of that cluster
+impurity(R,CL1,IC) :- impure(R), cluster(CL1), IC=#count{ I: cluster(I, CL2), CL2 != CL1 }.
 
 
-#minimize{ I: impurity(R,I) }.
-%#minimize{ S,R: rectsize(R,S) }.
-#minimize{ OU: outliercount(OU)  }.
-#minimize{ OC: overlapcount(OC) }.
+minrectval(R,A,V0,V1) :- rectangle(R), selattr(A), V0=#min{ V : rectinlier(R,I), value(I,A,V) },
+                            V1=#max{ V : rectinlier(R,I), value(I,A,V) }.
 
+:- rectangle(R), not rectinlier(R, _).
+%:- overlaps(R1, R2).
+%:- outlier(I).
+%:- impure(R).
 
+#minimize{ OU: overlapcount(OU) }.
+#minimize{ OV: outliercount(OV) }.
+#minimize{ IM: impurity(R,CL,IM)}.
+
+#show minrectval/4.
 #show selattr/1.
-#show rectattr/2.
-#show rectval/4.
 #show overlapcount/1.
 #show outliercount/1.
-#show impurity/2.
-#show rectsize/2.
-
-
+#show impurity/3.
