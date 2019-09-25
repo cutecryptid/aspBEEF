@@ -2,6 +2,9 @@ import csv
 import argparse
 import clingo
 import os
+from sys import argv
+from datetime import datetime
+import ntpath
 import webbrowser
 from distutils.dir_util import copy_tree, remove_tree
 
@@ -11,6 +14,8 @@ REPORT_RESOURCES_DIRNAME = ".resources/"
 REPORT_DIR_NAME = "htmlReports/"
 INDEX_PAGE_TEMPLATE_FILENAME = "index_template.html"
 INDEX_LIST_ELEMENT_TEMPLATE_FILENAME = "index_list_element_template.html"
+HOME_INDEX_PAGE_TEMPLATE_FILENAME = "home_index_template.html"
+HOME_INDEX_LIST_ELEMENT_TEMPLATE_FILENAME = "home_index_list_element_template.html"
 HTML_REPORT_TEMPLATE_FILENAME = "report_template.html"
 POINTS_TEMPLATE_FILENAME = "points_template.js"
 RECTANGLE_TEMPLATE_FILENAME = "rectangle_template.js"
@@ -26,20 +31,30 @@ sol_n = 0
 x_axis_parameter_name = None
 y_axis_parameter_name = None
 
+dataset_name = None
+moment = None
+command = None
 
-def init_directory():
-    # Creates destination directory
-    try:
-        os.mkdir(REPORT_DIR_NAME)
-    except FileExistsError:
-        remove_tree(REPORT_DIR_NAME)
+
+def init_directories():
+    # Creates reports directory if not exists
+    if not os.path.exists(REPORT_DIR_NAME):
         os.mkdir(REPORT_DIR_NAME)
 
     # Copy reports dependencies
-    copy_tree(REPORT_TEMPLATE_DIR_PATH + REPORT_RESOURCES_DIRNAME, REPORT_DIR_NAME + REPORT_RESOURCES_DIRNAME)
+    if not os.path.exists(REPORT_DIR_NAME + REPORT_RESOURCES_DIRNAME):
+        copy_tree(REPORT_TEMPLATE_DIR_PATH + REPORT_RESOURCES_DIRNAME, REPORT_DIR_NAME + REPORT_RESOURCES_DIRNAME)
+
+    # Dataset directory
+    if not os.path.exists(REPORT_DIR_NAME + dataset_name):
+        os.mkdir(REPORT_DIR_NAME + dataset_name)
+
+    # Execution instance directory
+    if not os.path.exists(REPORT_DIR_NAME + dataset_name + '/' + moment):
+        os.mkdir(REPORT_DIR_NAME + dataset_name + '/' + moment)
 
 
-def build_index():
+def build_report_index():
     # Load index page templates
     index_template = open(REPORT_TEMPLATE_DIR_PATH + INDEX_PAGE_TEMPLATE_FILENAME, 'r').read()
     index_list_element_template = open(REPORT_TEMPLATE_DIR_PATH + INDEX_LIST_ELEMENT_TEMPLATE_FILENAME, 'r').read()
@@ -58,13 +73,9 @@ def build_index():
     index_page = index_template.replace("#link_list_items#", links_to_reports_html)
 
     # Write report index page
-    index_page_file = open(REPORT_DIR_NAME + "index.html", "w+")
+    index_page_file = open(REPORT_DIR_NAME + dataset_name + '/' + moment + '/' + "index.html", "w+")
     index_page_file.write(index_page)
     index_page_file.close()    
-
-    print("\nFinished. Reports were generated in '" + REPORT_DIR_NAME + "'. Opening index.html in the default browser...")
-    webbrowser.open_new(REPORT_DIR_NAME + "index.html")
-    print()
 
 
 def build_html_report(clingo_solution):
@@ -153,12 +164,40 @@ def build_html_report(clingo_solution):
         replace("#y_axis_name#", y_axis_parameter_name)
 
     # Write report file for actual solution
-    report_file = open(REPORT_DIR_NAME + str(sol_n) + "_report.html", 'w+')
+    report_file = open(REPORT_DIR_NAME + dataset_name + '/' + moment + '/' + str(sol_n) + "_report.html", 'w+')
     report_file.write(report)
     report_file.close()
 
+
+def update_home_page():
+    # Load home page templates
+    home_template = open(REPORT_TEMPLATE_DIR_PATH + HOME_INDEX_PAGE_TEMPLATE_FILENAME, 'r').read()
+    home_list_element_template = open(REPORT_TEMPLATE_DIR_PATH + HOME_INDEX_LIST_ELEMENT_TEMPLATE_FILENAME, 'r').read()
+
+    # Build home page
+    links = ""
+    dirs = [x[0] for x in os.walk(REPORT_DIR_NAME + dataset_name)]
+    for d in sorted(dirs[1:]):
+        links += home_list_element_template.replace('#timestamp#', ntpath.basename(d)). \
+            replace('#command#', ' '.join(argv[2:]))
+
+    # Build index page
+    home_page = home_template.replace("#link_list_items#", links). \
+            replace('#dataset_name#', dataset_name)
+
+    # Write home page file
+    index_page_file = open(REPORT_DIR_NAME + dataset_name + '/' + "home.html", "w+")
+    index_page_file.write(home_page)
+    index_page_file.close()
+
+    print("\nFinished. New reports were generated in '" + REPORT_DIR_NAME + '/' + dataset_name + '/' + moment + "/'. Opening home page in the default browser...")
+    webbrowser.open_new(REPORT_DIR_NAME + dataset_name + "/home.html")
+    print()
+
+
 def print_model(m):
     print(str(m) + "\n")
+
 
 def print_build_model(m):
     print(str(m) + "\n")
@@ -217,6 +256,17 @@ def main():
 
     args = parser.parse_args()
 
+    # Setting up some global variables for report generation
+    global dataset_name
+    dataset_name = ntpath.basename(args.file)
+    
+    global moment
+    timestamp = datetime.now()
+    moment = '{y:d}_{m:d}_{d:d}-{h:d}:{mm:d}:{s:d}'. \
+        format(y = timestamp.year, m = timestamp.month, d = timestamp.day, h = timestamp.hour, mm = timestamp.minute, s = timestamp.second)
+
+    global command
+
     # Ad hoc selected parameters for iris dataset
     if args.selfeatures:
         selected_parameters = args.selfeatures
@@ -269,13 +319,13 @@ def main():
     options += ['-c selectcount=' + str(feature_count)]
 
     if args.report:
-        init_directory()
+        init_directories()
 
     solutions = solve_optimal('rectangles', [asp_facts, asp_selected_parameters], options, report=args.report)
 
     if args.report:
-        build_index()
-
+        build_report_index()
+        update_home_page()
 
 if __name__ == "__main__":
     main()
