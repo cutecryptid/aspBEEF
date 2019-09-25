@@ -23,7 +23,8 @@ rectinliercount(R,C) :- rectangle(R), C=#count{ I : rectinlier(R,I) }.
 inlier(I) :- rectinlier(R, I).
 outlier(I) :- pointid(I), not inlier(I).
 
-overlaps(R1, R2) :- rectinlier(R1, I), rectinlier(R2, I), R1 < R2.
+% An overlapping point is a single point that belongs to two rectangles
+overlappoint(I, R1, R2) :- rectinlier(R1, I), rectinlier(R2, I), R1 < R2.
 
 impure(R) :- rectangle(R), rectinlier(R,I1), rectinlier(R,I2), I1 < I2,
                 cluster(I1, C1), cluster(I2, C2), C1 != C2.
@@ -43,11 +44,9 @@ minrectval(R,A,V0,V1) :- rectangle(R), selattr(A), V0=#min{ V : rectinlier(R,I),
 :- rectangle(R), not rectinlier(R, _).
 
 outliercount(C) :- C=#count{ I : outlier(I) }.
-overlapcount(C) :- overlaps(R1, R2), C=#count{ I : rectinlier(R1, I), rectinlier(R2, I) }.
 
-% Overlap metric doesn't measure well
 #preference(overlap, less(cardinality)){
-    overlaps(R1, R2) : rectangle(R1), rectangle(R2)
+    overlappoint(I, R1, R2) : rectangle(R1), rectangle(R2), pointid(I)
 }.
 #preference(outlier, less(cardinality)){
     outlier(I) : pointid(I)
@@ -62,7 +61,7 @@ overlapcount(C) :- overlaps(R1, R2), C=#count{ I : rectinlier(R1, I), rectinlier
 #optimize(all).
 
 #show minrectval/4.
-#show overlapcount/1.
+#show overlappoint/3.
 #show outliercount/1.
 #show impurity/2.
 #show rectinliercount/2.
