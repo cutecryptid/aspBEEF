@@ -177,7 +177,7 @@ def update_home_page():
     # Build home page
     links = ""
     dirs = [x[0] for x in os.walk(REPORT_DIR_NAME + dataset_name)]
-    for d in dirs[1:]:
+    for d in sorted(dirs[1:]):
         links += home_list_element_template.replace('#timestamp#', ntpath.basename(d)). \
             replace('#command#', ' '.join(argv[2:]))
 
