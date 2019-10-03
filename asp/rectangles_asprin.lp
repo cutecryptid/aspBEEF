@@ -34,16 +34,21 @@ impurity(R,CL1,IC) :- impure(R), cluster(CL1),
             IC=#count{ I: cluster(I, CL2), CL2 != CL1, rectinlier(R,I) }.
 % The minimal number of impurity determines the purest cluster of a rectangle
 impurity(R,M) :- impure(R), M=#min{ CLI : impurity(R,CL,CLI)}.
-% Suming up the number of impure points for all rectangles we obtain the overall impurity
-%impurity(I) :- I=#sum{ M,R : impurity(R,M) }.
+
+rectcluster(R, CL) :- rectangle(R), not impure(R), rectinlier(R,I), cluster(I, CL).
+rectcluster(R, CL) :- impure(R), impurity(R,IM), impurity(R,CL,IM).
 
 
 minrectval(R,A,V0,V1) :- rectangle(R), selattr(A), V0=#min{ V : rectinlier(R,I), value(I,A,V) },
                             V1=#max{ V : rectinlier(R,I), value(I,A,V) }.
 
 :- rectangle(R), not rectinlier(R, _).
+:- rectangle(R), rectcluster(R,CL1), rectcluster(R,CL2), CL1 != CL2.
 
 outliercount(C) :- C=#count{ I : outlier(I) }.
+overlapcount(C) :- C=#count{ I : overlappoint(I, R1, R2) }.
+impurecount(C) :- C=#count{ I,R : impurity(R,I) }.
+
 
 #preference(overlap, less(cardinality)){
     overlappoint(I, R1, R2) : rectangle(R1), rectangle(R2), pointid(I)
@@ -61,7 +66,8 @@ outliercount(C) :- C=#count{ I : outlier(I) }.
 #optimize(all).
 
 #show minrectval/4.
-#show overlappoint/3.
-#show outliercount/1.
-#show impurity/2.
 #show rectinliercount/2.
+#show rectcluster/2.
+#show outliercount/1.
+#show overlapcount/1.
+#show impurecount/1.

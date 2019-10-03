@@ -1,7 +1,8 @@
 import csv
 import argparse
-import clingo
 import os
+import tempfile
+from subprocess import PIPE, Popen
 from sys import argv
 from datetime import datetime
 import ntpath
@@ -194,54 +195,35 @@ def update_home_page():
     webbrowser.open_new(REPORT_DIR_NAME + dataset_name + "/home.html")
     print()
 
+def parse_asprin_line(l):
+    parsed_line = l
+    return parsed_line
 
-def print_model(m):
-    print(str(m) + "\n")
+def build_asprin(parsed_line):
+    pass
 
+def solve_asprin(asp_program, asp_facts, clingo_args, report=False):
+    program = ''
+    with open("./asp/"+asp_program+".lp", 'r') as f:
+        program = f.read()
+    for fact in asp_facts:
+        program += fact + " \n"
+    
+    with tempfile.NamedTemporaryFile() as temp_file:
+        temp_file.write(program.encode())
+        temp_file.flush()
+        process = Popen(["asprin", temp_file.name] + clingo_args, stdout=PIPE, stderr=PIPE)
+        while True:
+            line = process.stdout.readline().rstrip()
+            if not line:
+                break
+            parsed_line = parse_asprin_line(line.decode('utf-8)'))
+            print(parsed_line)
+            if report:
+                build_asprin(parsed_line)
+            
+                
 
-def print_build_model(m):
-    print(str(m) + "\n")
-    build_html_report(m)
-
-
-def solve(asp_program, asp_facts, clingo_args, report=False):
-    c = clingo.Control(clingo_args)
-    if asp_program != "":
-        c.load("./asp/"+asp_program+".lp")
-    for facts in asp_facts:
-        c.add("base", [], facts)
-    c.ground([("base", [])])
-    ret = []
-    if report:
-        with c.solve(on_model=print_build_model, yield_=True) as handle:
-            for m in handle:
-                ret += [m.symbols(shown=True)]
-    else:
-        with c.solve(on_model=print_model, yield_=True) as handle:
-            for m in handle:
-                ret += [m.symbols(shown=True)]
-    return ret
-
-
-def solve_optimal(asp_program, asp_facts, clingo_args, report=False):
-    c = clingo.Control(clingo_args + ["--opt-mode=optN"])
-    if asp_program != "":
-        c.load("./asp/"+asp_program+".lp")
-    for facts in asp_facts:
-        c.add("base", [], facts)
-    c.ground([("base", [])])
-    ret = []
-    if report:
-        with c.solve(on_model=print_build_model, yield_=True) as handle:
-            for m in handle:
-                if (m.optimality_proven):
-                    ret += [m.symbols(shown=True)]
-    else:
-        with c.solve(on_model=print_build_model, yield_=True) as handle:
-            for m in handle:
-                if (m.optimality_proven):
-                    ret += [m.symbols(shown=True)]
-    return ret
 
 def main():
     # Handling command line arguments
@@ -253,6 +235,7 @@ def main():
     parser.add_argument('-n', '--nrect', type=int, default=2, help="Number of clusters")
     parser.add_argument('-c', '--solcount', type=int, default=10, help="Number of reported optimal solutions")
     parser.add_argument('-r', '--report', action='store_true', default=False)
+    parser.add_argument('-m', '--mode', choices=['weak', 'heuristic'])
 
     args = parser.parse_args()
 
@@ -314,14 +297,16 @@ def main():
 
     # Use -c selectcount=N to specify the number of dimensions of each rectangle
     # Specify the number of rectangles by changing the nrect value
-    options = [args.solcount]
-    options += ['-c nrect=' + str(args.nrect)]
-    options += ['-c selectcount=' + str(feature_count)]
+    options = [str(args.solcount)]
+    options += ['-c','nrect=' + str(args.nrect)]
+    options += ['-c','selectcount=' + str(feature_count)]
+    if args.mode is not None:
+        options += ['--approximation='+ str(args.mode) ]
 
     if args.report:
         init_directories()
 
-    solutions = solve_optimal('rectangles', [asp_facts, asp_selected_parameters], options, report=args.report)
+    solve_asprin('rectangles_asprin', [asp_facts, asp_selected_parameters], options, report=args.report)
 
     if args.report:
         build_report_index()
