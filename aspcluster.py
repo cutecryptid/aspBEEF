@@ -36,7 +36,6 @@ dataset_name = None
 moment = None
 command = None
 
-
 def init_directories():
     # Creates reports directory if not exists
     if not os.path.exists(REPORT_DIR_NAME):
@@ -222,10 +221,9 @@ def solve_asprin(asp_program, asp_facts, clingo_args, report=False):
             if report:
                 build_asprin(parsed_line)
             
-                
-
-
 def main():
+    os.environ["PYTHONUNBUFFERED"] = "TRUE"
+
     # Handling command line arguments
     parser = argparse.ArgumentParser(description='Experimental ASP clustering tool')
     parser.add_argument('file', type=str, help="CSV File")
@@ -311,6 +309,8 @@ def main():
     if args.report:
         build_report_index()
         update_home_page()
+    
+    os.environ["PYTHONUNBUFFERED"] = "FALSE"
 
 if __name__ == "__main__":
     main()
