@@ -21,7 +21,7 @@ int counter = -1;
 char *current;
 char *last;
 
-
+/* Used to print (in a json-like way) the atoms stored up to that moment */
 char* printAtoms(){
   char *string = "";
   int i;
@@ -53,7 +53,6 @@ char* printAtoms(){
 %token  SECONDS
 %token  FILENAME
 
-
 /* STATS TOKENS */
 %token STATNAME
 %token STAT_TIME_SOLVING
@@ -80,14 +79,13 @@ char* printAtoms(){
 
 
 /* Grammar follows */
-
 %%
 
 
 output:
-  output_header answerset_list stat_list              {exit(0);}
-  output_header answerset_list SATISFIABLE stat_list  {exit(0);}
-  output_header UNSATISFIABLE stat_list               {exit(0);}
+    output_header answerset_list stat_list              {exit(0);}
+  | output_header answerset_list SATISFIABLE stat_list  {exit(0);}
+  | output_header UNSATISFIABLE stat_list               {exit(0);}
   ;
 
 answerset_list:
@@ -109,6 +107,19 @@ answer_header:
     ANSWER num  {$$=$2; counter=-1; last=strCat("X",NULL); current=strCat("",NULL);}
   ;
 
+
+/*
+ * 'atoms' and 'values' store all the atoms and its values for the solution.
+ * Example; for the following solution:
+      rectinliercount(1,54) rectinliercount(2,9) outliercount(68) overlapcount(5)
+ * The content would be:
+      atoms[0]="rectinliercount" atoms[1]="outliercount" atoms[2]="overlapcount"
+      values[0]="[[1,54],[2,9]]" values[1]="[[68]]"      values[2]="[[5]]" 
+ *
+ * asparser takes advantage of the fact that clingo (and asprin) print the atoms of each
+ * solution in an ordered way. So it uses two variables ('current' and 'last') and a 'counter'
+ * to manage 'atoms' and 'values' arrays correctly.
+*/
 atoms:
     fterm       { if (strcmp(last, current) != 0){ // Change atom
                     counter++;
@@ -201,7 +212,6 @@ num :
 string:
     STRING {$$=yylval.strval;}
   ;
-
 
 
 /* End of grammar */
