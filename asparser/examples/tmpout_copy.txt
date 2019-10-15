@@ -1,0 +1,13 @@
+asprin version 3.1.0
+Reading from asp/rectangles_asprin.lp ...
+Solving...
+Answer: 1
+rectinliercount(1,54) rectinliercount(2,9) rectinliercount(3,24) rectcluster(1,'iris_versicolor') rectcluster(2,'iris_virginica') rectcluster(3,'iris_setosa') minrectval(1,'sepal_length',490,700) minrectval(1,'sepal_width',220,340) minrectval(1,'petal_length',300,509) minrectval(1,'petal_width',110,190) minrectval(2,'sepal_length',630,740) minrectval(2,'sepal_width',250,320) minrectval(2,'petal_length',530,630) minrectval(2,'petal_width',160,190) minrectval(3,'sepal_length',430,610) minrectval(3,'sepal_width',260,320) minrectval(3,'petal_length',110,470) minrectval(3,'petal_width',10,120) outliercount(68) overlapcount(5) impurecount(2)
+OPTIMUM FOUND
+
+Models       : 55+
+  Optimum    : yes
+  Optimal    : 1
+Calls        : 56
+Time         : 393.441s (Solving: 388.62s 1st Model: 378.07s Unsat: 10.32s)
+CPU Time     : 393.069s

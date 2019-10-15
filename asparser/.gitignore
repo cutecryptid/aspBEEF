@@ -1,0 +1,13 @@
+/*
+# Tacking ignore file
+!/.gitignore
+
+# Getterms
+!/parser.y
+!/scanner.l
+
+# Examples directory
+!/examples
+
+# Makefile
+!/Makefile
