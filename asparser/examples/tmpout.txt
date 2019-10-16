@@ -112,6 +112,12 @@ rectinliercount(1,43) rectinliercount(2,47) rectinliercount(3,49) rectcluster(1,
 Answer: 55
 rectinliercount(1,43) rectinliercount(2,47) rectinliercount(3,50) rectcluster(1,'iris_virginica') rectcluster(2,'iris_versicolor') rectcluster(3,'iris_setosa') minrectval(1,'sepal_length',560,790) minrectval(1,'sepal_width',250,380) minrectval(1,'petal_length',490,690) minrectval(1,'petal_width',180,250) minrectval(2,'sepal_length',490,700) minrectval(2,'sepal_width',200,340) minrectval(2,'petal_length',300,490) minrectval(2,'petal_width',100,160) minrectval(3,'sepal_length',430,580) minrectval(3,'sepal_width',229,440) minrectval(3,'petal_length',100,190) minrectval(3,'petal_width',10,60) outliercount(10) overlapcount(0) impurecount(0)
 OPTIMUM FOUND
+Answer: 56
+rectinliercount(1,43) rectinliercount(2,47) rectinliercount(3,50) rectcluster(1,'iris_virginica') rectcluster(2,'iris_versicolor') rectcluster(3,'iris_setosa') minrectval(1,'sepal_length',560,790) minrectval(1,'sepal_width',250,380) minrectval(1,'petal_length',490,690) minrectval(1,'petal_width',180,250) minrectval(2,'sepal_length',490,700) minrectval(2,'sepal_width',200,340) minrectval(2,'petal_length',300,490) minrectval(2,'petal_width',100,160) minrectval(3,'sepal_length',430,580) minrectval(3,'sepal_width',229,440) minrectval(3,'petal_length',100,190) minrectval(3,'petal_width',10,60) outliercount(10) overlapcount(0) impurecount(0)
+OPTIMUM FOUND
+Answer: 57
+rectinliercount(1,43) rectinliercount(2,47) rectinliercount(3,50) rectcluster(1,'iris_virginica') rectcluster(2,'iris_versicolor') rectcluster(3,'iris_setosa') minrectval(1,'sepal_length',560,790) minrectval(1,'sepal_width',250,380) minrectval(1,'petal_length',490,690) minrectval(1,'petal_width',180,250) minrectval(2,'sepal_length',490,700) minrectval(2,'sepal_width',200,340) minrectval(2,'petal_length',300,490) minrectval(2,'petal_width',100,160) minrectval(3,'sepal_length',430,580) minrectval(3,'sepal_width',229,440) minrectval(3,'petal_length',100,190) minrectval(3,'petal_width',10,60) outliercount(10) overlapcount(0) impurecount(0)
+OPTIMUM FOUND
 
 Models       : 55+
   Optimum    : yes

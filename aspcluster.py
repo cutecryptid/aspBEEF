@@ -2,6 +2,7 @@ import csv
 import argparse
 import os
 import tempfile
+import json
 from subprocess import PIPE, Popen
 from sys import argv
 from datetime import datetime
@@ -66,6 +67,7 @@ def build_report_index():
             replace("#report_id#", str(report_id)). \
             replace("#overlapping#", str(report_data['overlapping'])). \
             replace("#outliercount#", str(report_data['outliercount'])). \
+            replace("#impurecount#", str(report_data['impurity'])). \
             replace("#x_axis_name#", x_axis_parameter_name). \
             replace("#y_axis_name#", y_axis_parameter_name)
 
@@ -75,19 +77,39 @@ def build_report_index():
     # Write report index page
     index_page_file = open(REPORT_DIR_NAME + dataset_name + '/' + moment + '/' + "index.html", "w+")
     index_page_file.write(index_page)
-    index_page_file.close()    
+    index_page_file.close()
 
+def update_home_page():
+    # Load home page templates
+    home_template = open(REPORT_TEMPLATE_DIR_PATH + HOME_INDEX_PAGE_TEMPLATE_FILENAME, 'r').read()
+    home_list_element_template = open(REPORT_TEMPLATE_DIR_PATH + HOME_INDEX_LIST_ELEMENT_TEMPLATE_FILENAME, 'r').read()
 
-def build_html_report(clingo_solution):
-    """Generates the html reports using tokens and templates
+    # Build home page
+    links = ""
+    dirs = [x[0] for x in os.walk(REPORT_DIR_NAME + dataset_name)]
+    for d in sorted(dirs[1:]):
+        links += home_list_element_template.replace('#timestamp#', ntpath.basename(d)). \
+            replace('#command#', ' '.join(argv[2:]))
 
-    'points' must be a dictionary indexed by target class names and each value 
-    must be a list of points. 
-    Example -> {'Iris-setosa' : [[1,2],[2,3]], 'Iris-versicolor': [[3,2],[4,5]]}
+    # Build index page
+    home_page = home_template.replace("#link_list_items#", links). \
+            replace('#dataset_name#', dataset_name)
 
-    This function supposes that clingo solutions contain 'rectval',
-    'overlapcount' and 'outliercount' facts.
-    """
+    # Write home page file
+    index_page_file = open(REPORT_DIR_NAME + dataset_name + '/' + "index.html", "w+")
+    index_page_file.write(home_page)
+    index_page_file.close()
+
+    print("\nFinished. New reports were generated in '" + REPORT_DIR_NAME + '/' + dataset_name + '/' + moment + "/'. Opening home page in the default browser...")
+    webbrowser.open_new(REPORT_DIR_NAME + dataset_name + "/index.html")
+    print()
+
+def parse_asprin_line(l):
+    parsed_line = l
+    return parsed_line
+
+def build_asprin(sol_data):
+    """Generates the html reports using tokens and templates"""
 
     # Load the templates
     report_base_template  = open(REPORT_TEMPLATE_DIR_PATH + HTML_REPORT_TEMPLATE_FILENAME, 'r').read()
@@ -95,36 +117,36 @@ def build_html_report(clingo_solution):
     rectangle_template    = open(REPORT_TEMPLATE_DIR_PATH + RECTANGLE_TEMPLATE_FILENAME, 'r').read()
 
 
-    # Generate one report for each solution
-    global sol_n
-    sol_n += 1
+    sol_n = sol_data["solnum"]
     global index_page_data
     index_page_data[sol_n] = {}
     
     # Get clusters data and solution stats from solution
     clusters = {}
     params = []
-    for sym in clingo_solution.symbols(shown=True):
-        if sym.name == "minrectval":
-            args = sym.arguments  # 0: rectangle id | 1: parameter | 2: point
-            cluster_name = 'cluster' + str(args[0])
-            if cluster_name not in clusters:
-                clusters[cluster_name] = {}
-                clusters[cluster_name]['low']  = {}
-                clusters[cluster_name]['high'] = {}
-            clusters[cluster_name]['low'][str(args[1]).replace("'", '')] = str(args[2].number/FACTOR)
-            clusters[cluster_name]['high'][str(args[1]).replace("'", '')] = str(args[3].number/FACTOR)
-        elif sym.name == "overlapcount":
-            overlapping = str(sym.arguments[0])
-            index_page_data[sol_n]['overlapping'] = overlapping
-        elif sym.name == "outliercount":
-            outliercount = str(sym.arguments[0])
-            index_page_data[sol_n]['outliercount'] = outliercount
-        elif sym.name == "selattr":
-            params += [str(sym.arguments[0])]
+    for rect in sol_data["atoms"]["minrectval"]:
+        cluster_name = 'cluster' + str(rect[0])
+        if cluster_name not in clusters:
+            clusters[cluster_name] = {}
+            clusters[cluster_name]['low']  = {}
+            clusters[cluster_name]['high'] = {}
+        clusters[cluster_name]['low'][str(rect[1]).replace("\"", '')] = str(rect[2]/FACTOR)
+        clusters[cluster_name]['high'][str(rect[1]).replace("\"", '')] = str(rect[3]/FACTOR)
     
-    param1_index = csv_features.index(params[0][1:-1])
-    param2_index = csv_features.index(params[1][1:-1])
+    for attr in sol_data["atoms"]["selattr"]:
+        params += [attr[0]]
+
+    overlapping = str(sol_data["atoms"]["overlapcount"][0][0])
+    index_page_data[sol_n]['overlapping'] = overlapping
+
+    outliers = str(sol_data["atoms"]["outliercount"][0][0])
+    index_page_data[sol_n]['outliercount'] = outliers
+
+    impurity = str(sol_data["atoms"]["impurecount"][0][0])
+    index_page_data[sol_n]['impurity'] = impurity
+    
+    param1_index = csv_features.index(params[0])
+    param2_index = csv_features.index(params[1])
 
     x_axis_index = min(param1_index, param2_index)
     y_axis_index = max(param1_index, param2_index)
@@ -159,7 +181,8 @@ def build_html_report(clingo_solution):
         replace("#class_names#", str(list(points.keys()))). \
         replace("#chart_data#", chart_data). \
         replace("#overlapping#", overlapping). \
-        replace("#outliercount#", outliercount). \
+        replace("#outliercount#", outliers). \
+        replace("#impurecount#", impurity). \
         replace("#x_axis_name#", x_axis_parameter_name). \
         replace("#y_axis_name#", y_axis_parameter_name)
 
@@ -167,39 +190,7 @@ def build_html_report(clingo_solution):
     report_file = open(REPORT_DIR_NAME + dataset_name + '/' + moment + '/' + str(sol_n) + "_report.html", 'w+')
     report_file.write(report)
     report_file.close()
-
-
-def update_home_page():
-    # Load home page templates
-    home_template = open(REPORT_TEMPLATE_DIR_PATH + HOME_INDEX_PAGE_TEMPLATE_FILENAME, 'r').read()
-    home_list_element_template = open(REPORT_TEMPLATE_DIR_PATH + HOME_INDEX_LIST_ELEMENT_TEMPLATE_FILENAME, 'r').read()
-
-    # Build home page
-    links = ""
-    dirs = [x[0] for x in os.walk(REPORT_DIR_NAME + dataset_name)]
-    for d in sorted(dirs[1:]):
-        links += home_list_element_template.replace('#timestamp#', ntpath.basename(d)). \
-            replace('#command#', ' '.join(argv[2:]))
-
-    # Build index page
-    home_page = home_template.replace("#link_list_items#", links). \
-            replace('#dataset_name#', dataset_name)
-
-    # Write home page file
-    index_page_file = open(REPORT_DIR_NAME + dataset_name + '/' + "home.html", "w+")
-    index_page_file.write(home_page)
-    index_page_file.close()
-
-    print("\nFinished. New reports were generated in '" + REPORT_DIR_NAME + '/' + dataset_name + '/' + moment + "/'. Opening home page in the default browser...")
-    webbrowser.open_new(REPORT_DIR_NAME + dataset_name + "/home.html")
-    print()
-
-def parse_asprin_line(l):
-    parsed_line = l
-    return parsed_line
-
-def build_asprin(parsed_line):
-    pass
+    
 
 def solve_asprin(asp_program, asp_facts, clingo_args, report=False):
     program = ''
@@ -212,14 +203,16 @@ def solve_asprin(asp_program, asp_facts, clingo_args, report=False):
         temp_file.write(program.encode())
         temp_file.flush()
         process = Popen(["asprin", temp_file.name] + clingo_args, stdout=PIPE, stderr=PIPE)
+        parser = Popen(["./asparser/asparser"], stdin=process.stdout, stdout=PIPE, stderr=PIPE)
         while True:
-            line = process.stdout.readline().rstrip()
+            line = parser.stdout.readline().rstrip()
             if not line:
                 break
             parsed_line = parse_asprin_line(line.decode('utf-8)'))
-            print(parsed_line)
+            sol_data = json.loads(parsed_line)
+            print("FOUND SOLUTION #{0}".format(sol_data["solnum"]))
             if report:
-                build_asprin(parsed_line)
+                build_asprin(sol_data)
             
 def main():
     os.environ["PYTHONUNBUFFERED"] = "TRUE"
@@ -243,8 +236,7 @@ def main():
     
     global moment
     timestamp = datetime.now()
-    moment = '{y:d}_{m:d}_{d:d}-{h:d}:{mm:d}:{s:d}'. \
-        format(y = timestamp.year, m = timestamp.month, d = timestamp.day, h = timestamp.hour, mm = timestamp.minute, s = timestamp.second)
+    moment = timestamp.strftime("%Y_%m_%d-%H:%M:%S")
 
     global command
 
@@ -308,6 +300,7 @@ def main():
 
     if args.report:
         build_report_index()
+        # TODO: Update Home Page with each solution
         update_home_page()
     
     os.environ["PYTHONUNBUFFERED"] = "FALSE"

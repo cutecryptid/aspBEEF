@@ -53,14 +53,14 @@ impurecount(C) :- C=#count{ I,R : impurity(R,I) }.
 #preference(overlap, less(cardinality)){
     overlappoint(I, R1, R2) : rectangle(R1), rectangle(R2), pointid(I)
 }.
-#preference(outlier, less(cardinality)){
-    outlier(I) : pointid(I)
-}.
 #preference(impurity, less(weight)){
     I,R :: impurity(R,I)
 }.
-#preference(all, pareto){
-    **overlap; **outlier; **impurity
+#preference(outlier, less(cardinality)){
+    outlier(I) : pointid(I)
+}.
+#preference(all, lexico){
+    3::**overlap; 2::**impurity; 1::**outlier
 }.
 
 #optimize(all).
@@ -71,3 +71,4 @@ impurecount(C) :- C=#count{ I,R : impurity(R,I) }.
 #show outliercount/1.
 #show overlapcount/1.
 #show impurecount/1.
+#show selattr/1.
