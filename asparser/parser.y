@@ -170,7 +170,7 @@ termlist :
 term :
     id      {$$=$1;}
   | num     {$$=$1;}
-  | string  {$$=strCat("\""",$1,"\""",NULL);}
+  | string  {$$=strCat("\"",$1,"\"",NULL);}
   ;
 
 
