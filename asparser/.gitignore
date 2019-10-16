@@ -11,3 +11,6 @@
 
 # Makefile
 !/Makefile
+
+!/asparser.c
+!/asparser.h
