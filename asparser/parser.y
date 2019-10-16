@@ -163,14 +163,14 @@ fterm :
   ;
   
 termlist :
-    term              {$$=strCat("\"",$1,"\"", NULL);}
-  | termlist ',' term {$$=strCat($1,",\"",$3,"\"",NULL);}
+    term              {$$=strCat($1,NULL);}
+  | termlist ',' term {$$=strCat($1,",",$3,NULL);}
   ;
 
 term :
     id      {$$=$1;}
   | num     {$$=$1;}
-  | string  {$$=$1;}
+  | string  {$$=strCat("'",$1,"'",NULL);}
   ;
 
 
