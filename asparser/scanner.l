@@ -17,10 +17,10 @@ STATNAME [A-Z0-9][A-Za-z]+
 
 %%
 
-"OPTIMUM FOUND"		{return OPTIMUMFOUND;}
-"SATISFIABLE"		{return SATISFIABLE;}
-"UNSATISFIABLE"		{return UNSATISFIABLE;} 
-"Answer:"			{return ANSWER;}
+"OPTIMUM FOUND"(" *")?	{return OPTIMUMFOUND;}
+"SATISFIABLE"			{return SATISFIABLE;}
+"UNSATISFIABLE"			{return UNSATISFIABLE;} 
+"Answer:"				{return ANSWER;}
 
 "1st Model"		{return STAT_TIME_FIRST_MODEL;}
 
