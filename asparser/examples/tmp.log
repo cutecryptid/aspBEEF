@@ -1,0 +1,54 @@
+asprin version 3.1.0
+Reading from asp/rectangles_asprin.lp ...
+Solving...
+Answer: 1
+rectinliercount(1,2) rectinliercount(2,1) rectinliercount(3,1) rectcluster(1,'iris_setosa') rectcluster(2,'iris_setosa') rectcluster(3,'iris_setosa') minrectval(1,'sepal_width',300,310) minrectval(1,'petal_width',20,20) minrectval(2,'sepal_width',340,340) minrectval(2,'petal_width',30,30) minrectval(3,'sepal_width',340,340) minrectval(3,'petal_width',30,30) outliercount(27) overlapcount(1) impurecount(0)
+Answer: 2
+rectinliercount(1,1) rectinliercount(2,7) rectinliercount(3,1) rectcluster(1,'iris_setosa') rectcluster(2,'iris_setosa') rectcluster(3,'iris_setosa') minrectval(1,'sepal_width',290,290) minrectval(1,'petal_width',20,20) minrectval(2,'sepal_width',300,360) minrectval(2,'petal_width',20,30) minrectval(3,'sepal_width',340,340) minrectval(3,'petal_width',30,30) outliercount(22) overlapcount(1) impurecount(0)
+Answer: 3
+rectinliercount(1,4) rectinliercount(2,5) rectinliercount(3,6) rectcluster(1,'iris_versicolor') rectcluster(2,'iris_virginica') rectcluster(3,'iris_setosa') minrectval(1,'sepal_width',229,290) minrectval(1,'petal_width',130,140) minrectval(2,'sepal_width',270,300) minrectval(2,'petal_width',180,210) minrectval(3,'sepal_width',300,350) minrectval(3,'petal_width',20,30) outliercount(15) overlapcount(0) impurecount(0)
+Answer: 4
+rectinliercount(1,5) rectinliercount(2,4) rectinliercount(3,7) rectcluster(1,'iris_virginica') rectcluster(2,'iris_versicolor') rectcluster(3,'iris_setosa') minrectval(1,'sepal_width',250,290) minrectval(1,'petal_width',170,190) minrectval(2,'sepal_width',270,290) minrectval(2,'petal_width',130,150) minrectval(3,'sepal_width',290,350) minrectval(3,'petal_width',20,30) outliercount(14) overlapcount(0) impurecount(0)
+Answer: 5
+rectinliercount(1,4) rectinliercount(2,3) rectinliercount(3,10) rectcluster(1,'iris_setosa') rectcluster(2,'iris_virginica') rectcluster(3,'iris_versicolor') minrectval(1,'sepal_width',320,350) minrectval(1,'petal_width',20,30) minrectval(2,'sepal_width',300,300) minrectval(2,'petal_width',210,220) minrectval(3,'sepal_width',229,330) minrectval(3,'petal_width',100,160) outliercount(13) overlapcount(0) impurecount(0)
+Answer: 6
+rectinliercount(1,4) rectinliercount(2,10) rectinliercount(3,4) rectcluster(1,'iris_versicolor') rectcluster(2,'iris_setosa') rectcluster(3,'iris_virginica') minrectval(1,'sepal_width',310,330) minrectval(1,'petal_length',450,490) minrectval(2,'sepal_width',290,390) minrectval(2,'petal_length',130,170) minrectval(3,'sepal_width',300,330) minrectval(3,'petal_length',580,660) outliercount(12) overlapcount(0) impurecount(0)
+Answer: 7
+rectinliercount(1,3) rectinliercount(2,8) rectinliercount(3,8) rectcluster(1,'iris_versicolor') rectcluster(2,'iris_setosa') rectcluster(3,'iris_virginica') minrectval(1,'sepal_width',310,330) minrectval(1,'petal_length',470,490) minrectval(2,'sepal_width',290,360) minrectval(2,'petal_length',140,150) minrectval(3,'sepal_width',270,360) minrectval(3,'petal_length',509,660) outliercount(11) overlapcount(0) impurecount(0)
+Answer: 8
+rectinliercount(1,10) rectinliercount(2,10) rectinliercount(3,10) rectcluster(1,'iris_setosa') rectcluster(2,'iris_virginica') rectcluster(3,'iris_versicolor') minrectval(1,'sepal_length',440,540) minrectval(1,'petal_width',10,40) minrectval(2,'sepal_length',490,760) minrectval(2,'petal_width',170,250) minrectval(3,'sepal_length',490,700) minrectval(3,'petal_width',100,160) outliercount(0) overlapcount(0) impurecount(0)
+OPTIMUM FOUND
+Answer: 9
+rectinliercount(1,10) rectinliercount(2,10) rectinliercount(3,10) rectcluster(1,'iris_setosa') rectcluster(2,'iris_virginica') rectcluster(3,'iris_versicolor') minrectval(1,'sepal_length',440,540) minrectval(1,'petal_width',10,40) minrectval(2,'sepal_length',490,760) minrectval(2,'petal_width',170,250) minrectval(3,'sepal_length',490,700) minrectval(3,'petal_width',100,160) outliercount(0) overlapcount(0) impurecount(0)
+OPTIMUM FOUND *
+Answer: 10
+rectinliercount(1,10) rectinliercount(2,10) rectinliercount(3,10) rectcluster(1,'iris_setosa') rectcluster(2,'iris_virginica') rectcluster(3,'iris_versicolor') minrectval(1,'sepal_length',440,540) minrectval(1,'petal_width',10,40) minrectval(2,'sepal_length',490,760) minrectval(2,'petal_width',170,250) minrectval(3,'sepal_length',490,700) minrectval(3,'petal_width',100,160) outliercount(0) overlapcount(0) impurecount(0)
+OPTIMUM FOUND *
+Answer: 11
+rectinliercount(1,10) rectinliercount(2,10) rectinliercount(3,10) rectcluster(1,'iris_setosa') rectcluster(2,'iris_virginica') rectcluster(3,'iris_versicolor') minrectval(1,'sepal_length',440,540) minrectval(1,'petal_width',10,40) minrectval(2,'sepal_length',490,760) minrectval(2,'petal_width',170,250) minrectval(3,'sepal_length',490,700) minrectval(3,'petal_width',100,160) outliercount(0) overlapcount(0) impurecount(0)
+OPTIMUM FOUND *
+Answer: 12
+rectinliercount(1,10) rectinliercount(2,10) rectinliercount(3,10) rectcluster(1,'iris_setosa') rectcluster(2,'iris_virginica') rectcluster(3,'iris_versicolor') minrectval(1,'sepal_length',440,540) minrectval(1,'petal_width',10,40) minrectval(2,'sepal_length',490,760) minrectval(2,'petal_width',170,250) minrectval(3,'sepal_length',490,700) minrectval(3,'petal_width',100,160) outliercount(0) overlapcount(0) impurecount(0)
+OPTIMUM FOUND *
+Answer: 13
+rectinliercount(1,10) rectinliercount(2,10) rectinliercount(3,10) rectcluster(1,'iris_setosa') rectcluster(2,'iris_virginica') rectcluster(3,'iris_versicolor') minrectval(1,'sepal_length',440,540) minrectval(1,'petal_width',10,40) minrectval(2,'sepal_length',490,760) minrectval(2,'petal_width',170,250) minrectval(3,'sepal_length',490,700) minrectval(3,'petal_width',100,160) outliercount(0) overlapcount(0) impurecount(0)
+OPTIMUM FOUND *
+Answer: 14
+rectinliercount(1,10) rectinliercount(2,10) rectinliercount(3,10) rectcluster(1,'iris_setosa') rectcluster(2,'iris_virginica') rectcluster(3,'iris_versicolor') minrectval(1,'sepal_length',440,540) minrectval(1,'petal_width',10,40) minrectval(2,'sepal_length',490,760) minrectval(2,'petal_width',170,250) minrectval(3,'sepal_length',490,700) minrectval(3,'petal_width',100,160) outliercount(0) overlapcount(0) impurecount(0)
+OPTIMUM FOUND *
+Answer: 15
+rectinliercount(1,10) rectinliercount(2,10) rectinliercount(3,10) rectcluster(1,'iris_setosa') rectcluster(2,'iris_virginica') rectcluster(3,'iris_versicolor') minrectval(1,'sepal_length',440,540) minrectval(1,'petal_width',10,40) minrectval(2,'sepal_length',490,760) minrectval(2,'petal_width',170,250) minrectval(3,'sepal_length',490,700) minrectval(3,'petal_width',100,160) outliercount(0) overlapcount(0) impurecount(0)
+OPTIMUM FOUND *
+Answer: 16
+rectinliercount(1,10) rectinliercount(2,10) rectinliercount(3,10) rectcluster(1,'iris_setosa') rectcluster(2,'iris_virginica') rectcluster(3,'iris_versicolor') minrectval(1,'sepal_length',440,540) minrectval(1,'petal_width',10,40) minrectval(2,'sepal_length',490,760) minrectval(2,'petal_width',170,250) minrectval(3,'sepal_length',490,700) minrectval(3,'petal_width',100,160) outliercount(0) overlapcount(0) impurecount(0)
+OPTIMUM FOUND *
+Answer: 17
+rectinliercount(1,10) rectinliercount(2,10) rectinliercount(3,10) rectcluster(1,'iris_setosa') rectcluster(2,'iris_virginica') rectcluster(3,'iris_versicolor') minrectval(1,'sepal_length',440,540) minrectval(1,'petal_width',10,40) minrectval(2,'sepal_length',490,760) minrectval(2,'petal_width',170,250) minrectval(3,'sepal_length',490,700) minrectval(3,'petal_width',100,160) outliercount(0) overlapcount(0) impurecount(0)
+OPTIMUM FOUND *
+
+Models       : 17+
+  Optimum    : yes
+  Optimal    : 10
+Calls        : 10
+Time         : 0.515s (Solving: 0.08s 1st Model: 0.06s Unsat: 0.00s)
+CPU Time     : 0.515s
