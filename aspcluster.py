@@ -30,12 +30,10 @@ points = None
 csv_features = None
 index_page_data = {}
 sol_n = 0
-x_axis_parameter_name = None
-y_axis_parameter_name = None
+selected_attributes = None
 
 dataset_name = None
 moment = None
-command = None
 
 def init_directories():
     # Creates reports directory if not exists
@@ -54,6 +52,9 @@ def init_directories():
     if not os.path.exists(REPORT_DIR_NAME + dataset_name + '/' + moment):
         os.mkdir(REPORT_DIR_NAME + dataset_name + '/' + moment)
 
+def store_command(command):
+    with open(REPORT_DIR_NAME + dataset_name + '/' + moment + '/command', 'w') as f:
+        f.write(command)
 
 def build_report_index():
     # Load index page templates
@@ -61,18 +62,23 @@ def build_report_index():
     index_list_element_template = open(REPORT_TEMPLATE_DIR_PATH + INDEX_LIST_ELEMENT_TEMPLATE_FILENAME, 'r').read()
 
     # Generate links to reports (html code)
-    links_to_reports_html = ""
+    trace_links_to_reports_html = ""
+    optimal_links_to_reports_html = ""
     for report_id, report_data in index_page_data.items():
-        links_to_reports_html += index_list_element_template.replace("#report_file_path#", str(report_id) + "_report.html"). \
+        tmp_html = index_list_element_template.replace("#report_file_path#", str(report_id) + "_report.html"). \
             replace("#report_id#", str(report_id)). \
             replace("#overlapping#", str(report_data['overlapping'])). \
             replace("#outliercount#", str(report_data['outliercount'])). \
             replace("#impurecount#", str(report_data['impurity'])). \
-            replace("#x_axis_name#", x_axis_parameter_name). \
-            replace("#y_axis_name#", y_axis_parameter_name)
+            replace("#selattr#", selected_attributes)
+        if report_data["optimum"]:
+            optimal_links_to_reports_html += tmp_html
+        else:
+            trace_links_to_reports_html += tmp_html
 
     # Build index page
-    index_page = index_template.replace("#link_list_items#", links_to_reports_html)
+    index_page = index_template.replace("#trace_link_list_items#", trace_links_to_reports_html). \
+        replace("#optimal_link_list_items#", optimal_links_to_reports_html)
 
     # Write report index page
     index_page_file = open(REPORT_DIR_NAME + dataset_name + '/' + moment + '/' + "index.html", "w+")
@@ -88,8 +94,9 @@ def update_home_page():
     links = ""
     dirs = [x[0] for x in os.walk(REPORT_DIR_NAME + dataset_name)]
     for d in sorted(dirs[1:]):
+        command = open(REPORT_DIR_NAME + dataset_name + "/" + ntpath.basename(d) + '/command', 'r').read()
         links += home_list_element_template.replace('#timestamp#', ntpath.basename(d)). \
-            replace('#command#', ' '.join(argv[2:]))
+            replace('#command#', command)
 
     # Build index page
     home_page = home_template.replace("#link_list_items#", links). \
@@ -104,10 +111,6 @@ def update_home_page():
     webbrowser.open_new(REPORT_DIR_NAME + dataset_name + "/index.html")
     print()
 
-def parse_asprin_line(l):
-    parsed_line = l
-    return parsed_line
-
 def build_asprin(sol_data):
     """Generates the html reports using tokens and templates"""
 
@@ -120,6 +123,11 @@ def build_asprin(sol_data):
     sol_n = sol_data["solnum"]
     global index_page_data
     index_page_data[sol_n] = {}
+
+    if "optimum" in sol_data.keys():
+        index_page_data[sol_n]["optimum"] = True
+    else:
+        index_page_data[sol_n]["optimum"] = False
     
     # Get clusters data and solution stats from solution
     clusters = {}
@@ -145,22 +153,21 @@ def build_asprin(sol_data):
     impurity = str(sol_data["atoms"]["impurecount"][0][0])
     index_page_data[sol_n]['impurity'] = impurity
     
-    param1_index = csv_features.index(params[0])
-    param2_index = csv_features.index(params[1])
+    param_index = [csv_features.index(x) for x in params]
+    param_index = sorted(param_index)
+    param_index_names = [csv_features[x] for x in param_index]
 
-    x_axis_index = min(param1_index, param2_index)
-    y_axis_index = max(param1_index, param2_index)
+    # TODO: Work with lists instead of named x/y params to allow for multidimensional visualization
+    x_axis_parameter_name = param_index_names[0]
+    y_axis_parameter_name = param_index_names[1]
 
-    global x_axis_parameter_name
-    x_axis_parameter_name = csv_features[x_axis_index]
-    global y_axis_parameter_name
-    y_axis_parameter_name = csv_features[y_axis_index]
-
+    global selected_attributes
+    selected_attributes = "/".join(param_index_names)
 
     # Generate points data from points_template
     points_data = ""
     for class_name, values in points.items():
-        filtered_values = [[v[x_axis_index], v[y_axis_index]] for v in values]
+        filtered_values = [[v[param_index[0]], v[param_index[1]]] for v in values]
         points_data += points_template.replace("#className#", class_name).replace("#data#", str(filtered_values))
 
     # Generate clusters_data
@@ -190,6 +197,40 @@ def build_asprin(sol_data):
     report_file = open(REPORT_DIR_NAME + dataset_name + '/' + moment + '/' + str(sol_n) + "_report.html", 'w+')
     report_file.write(report)
     report_file.close()
+
+def build_rules(sol_data):
+    clusters = {k:v for (k,v) in sol_data['atoms']['rectcluster']}
+    rev_clusters = {}
+    for k,v in clusters.items():
+        rev_clusters[v] = rev_clusters.get(v, []) + [k]
+
+    rectvals = {}
+    for rect in sol_data['atoms']['minrectval']:
+        cluster = rect[0]
+        attr = rect[1]
+        vals = tuple(rect[2:])
+        if cluster not in rectvals.keys():
+            rectvals.update({ cluster: { attr: vals }})
+        else:
+            rectvals[cluster].update( { attr:vals } )   
+
+    clustervals = {}
+    for k,v in rev_clusters.items():
+        clustervals.update({ k: [rectvals[cl] for cl in v]})
+  
+    return clustervals
+
+def rules_to_text(rule_dict):
+    rulestr = ""
+    for k,v in rule_dict.items():
+        rulestr += "Rule(s) for Class {0}\n".format(k)
+        for idx,rect in enumerate(v):
+            rulestr += "  Rule #{0}\n".format(idx)
+            for attr,val in rect.items():
+                rulestr += "    {a} is between {l} and {h}\n".format(
+                    a = attr, l = val[0], h = val[1]
+                )
+    return rulestr
     
 
 def solve_asprin(asp_program, asp_facts, clingo_args, report=False):
@@ -208,11 +249,17 @@ def solve_asprin(asp_program, asp_facts, clingo_args, report=False):
             line = parser.stdout.readline().rstrip()
             if not line:
                 break
-            parsed_line = parse_asprin_line(line.decode('utf-8)'))
+            parsed_line = line.decode('utf-8)')
             sol_data = json.loads(parsed_line)
-            print("FOUND SOLUTION #{0}".format(sol_data["solnum"]))
+            print("FOUND SOLUTION #{0} ({1} / {2} / {3})".format(sol_data["solnum"],
+                sol_data["atoms"]["overlapcount"][0][0], sol_data["atoms"]["impurecount"][0][0],
+                sol_data["atoms"]["outliercount"][0][0]))
+            if "optimum" in sol_data.keys():
+                rules = build_rules(sol_data)
+                print(rules_to_text(rules))
             if report:
                 build_asprin(sol_data)
+            
             
 def main():
     os.environ["PYTHONUNBUFFERED"] = "TRUE"
@@ -224,7 +271,7 @@ def main():
     parser.add_argument('-f', '--features', type=int, default=2, help="Number of features used")
     parser.add_argument('-s', '--selfeatures', type=str, nargs='*', help="Selected features by name")
     parser.add_argument('-n', '--nrect', type=int, default=2, help="Number of clusters")
-    parser.add_argument('-c', '--solcount', type=int, default=10, help="Number of reported optimal solutions")
+    parser.add_argument('-c', '--solcount', type=int, default=1, help="Number of reported optimal solutions")
     parser.add_argument('-r', '--report', action='store_true', default=False)
     parser.add_argument('-m', '--mode', choices=['weak', 'heuristic'])
 
@@ -238,7 +285,7 @@ def main():
     timestamp = datetime.now()
     moment = timestamp.strftime("%Y_%m_%d-%H:%M:%S")
 
-    global command
+    command = " ".join(argv[2:])
 
     # Ad hoc selected parameters for iris dataset
     if args.selfeatures:
@@ -295,6 +342,7 @@ def main():
 
     if args.report:
         init_directories()
+        store_command(command)
 
     solve_asprin('rectangles_asprin', [asp_facts, asp_selected_parameters], options, report=args.report)
 
