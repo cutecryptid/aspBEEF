@@ -3,6 +3,7 @@ import argparse
 import os
 import tempfile
 import json
+import warnings
 from subprocess import PIPE, Popen
 from sys import argv
 from datetime import datetime
@@ -31,6 +32,7 @@ csv_features = None
 index_page_data = {}
 sol_n = 0
 selected_attributes = None
+attribute_names = []
 
 dataset_name = None
 moment = None
@@ -157,27 +159,25 @@ def build_asprin(sol_data):
     param_index = sorted(param_index)
     param_index_names = [csv_features[x] for x in param_index]
 
-    # TODO: Work with lists instead of named x/y params to allow for multidimensional visualization
-    x_axis_parameter_name = param_index_names[0]
-    y_axis_parameter_name = param_index_names[1]
-
     global selected_attributes
+    global attribute_names
     selected_attributes = "/".join(param_index_names)
+    attribute_names = param_index_names
 
     # Generate points data from points_template
     points_data = ""
     for class_name, values in points.items():
-        filtered_values = [[v[param_index[0]], v[param_index[1]]] for v in values]
+        filtered_values = [[v[p] for p in param_index] for v in values]
         points_data += points_template.replace("#className#", class_name).replace("#data#", str(filtered_values))
 
     # Generate clusters_data
     chart_data = ""
     for cluster, limits in clusters.items():
         cluster_data = rectangle_template.replace("#name#", cluster)
-        cluster_data = cluster_data.replace("#x_low_limit#", limits['low'][x_axis_parameter_name])
-        cluster_data = cluster_data.replace("#x_high_limit#", limits['high'][x_axis_parameter_name])
-        cluster_data = cluster_data.replace("#y_low_limit#", limits['low'][y_axis_parameter_name])
-        cluster_data = cluster_data.replace("#y_high_limit#", limits['high'][y_axis_parameter_name])
+        cluster_data = cluster_data.replace("#x_low_limit#", limits['low'][param_index_names[0]])
+        cluster_data = cluster_data.replace("#x_high_limit#", limits['high'][param_index_names[0]])
+        cluster_data = cluster_data.replace("#y_low_limit#", limits['low'][param_index_names[1]])
+        cluster_data = cluster_data.replace("#y_high_limit#", limits['high'][param_index_names[1]])
 
         chart_data += cluster_data
 
@@ -190,8 +190,10 @@ def build_asprin(sol_data):
         replace("#overlapping#", overlapping). \
         replace("#outliercount#", outliers). \
         replace("#impurecount#", impurity). \
-        replace("#x_axis_name#", x_axis_parameter_name). \
-        replace("#y_axis_name#", y_axis_parameter_name)
+        replace("#x_axis_name#", param_index_names[0]). \
+        replace("#y_axis_name#", param_index_names[1])
+
+    #TODO: Add all possible parameters to a axis selector dropdown
 
     # Write report file for actual solution
     report_file = open(REPORT_DIR_NAME + dataset_name + '/' + moment + '/' + str(sol_n) + "_report.html", 'w+')
@@ -296,7 +298,7 @@ def main():
     feature_count = max(len(selected_parameters), args.features)
 
     if feature_count != 2 and args.report:
-        raise SystemExit('Error: When reporting, only 2 features are supported')
+        warnings.warn("Despite working with >=2 features, only the two first ones will be reported", UserWarning)
     if feature_count < 2:
         raise SystemExit('Error: Must use more than 2 features for clustering')
 
