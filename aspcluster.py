@@ -318,7 +318,7 @@ def main():
         asp_facts += "\n"
         for i,row in enumerate(datareader):
             point = []
-            for j,(k,v) in enumerate(row.items()):
+            for k,v in row.items():
                 if k == args.target:
                     asp_facts += "cluster({0}, '{1}'). ".format(i,v.replace('-','_').lower())
                     if v not in points:
