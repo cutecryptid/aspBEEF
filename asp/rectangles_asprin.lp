@@ -1,5 +1,8 @@
 #const nrect = 1.
 #const selectcount = 2.
+#const overlapprio = 3.
+#const impurityprio = 2.
+#const outlierprio = 1.
 
 rectangle(1..nrect).
 
@@ -7,7 +10,7 @@ pointid(I) :- value(I,A,V).
 attribute(A) :- value(I, A, V).
 cluster(CL) :- cluster(I,CL).
 
-selectcount { selattr(A):attribute(A) } selectcount.
+selectcount { selattr(A):attribute(A), not target(A) } selectcount.
 
 2 { rectval(R,A,V) : value(_,A,V) } 2 :- rectangle(R), selattr(A).
 
@@ -38,6 +41,7 @@ impurity(R,M) :- impure(R), M=#min{ CLI : impurity(R,CL,CLI)}.
 rectcluster(R, CL) :- rectangle(R), not impure(R), rectinlier(R,I), cluster(I, CL).
 rectcluster(R, CL) :- impure(R), impurity(R,IM), impurity(R,CL,IM).
 
+impurepoint(I) :- rectinlier(R,I), impure(R), cluster(I,CLI), rectcluster(R,CLR), CLI != CLR.
 
 minrectval(R,A,V0,V1) :- rectangle(R), selattr(A), V0=#min{ V : rectinlier(R,I), value(I,A,V) },
                             V1=#max{ V : rectinlier(R,I), value(I,A,V) }.
@@ -47,20 +51,20 @@ minrectval(R,A,V0,V1) :- rectangle(R), selattr(A), V0=#min{ V : rectinlier(R,I),
 
 outliercount(C) :- C=#count{ I : outlier(I) }.
 overlapcount(C) :- C=#count{ I : overlappoint(I, R1, R2) }.
-impurecount(C) :- C=#count{ I,R : impurity(R,I) }.
+impurecount(C) :- C=#count{ I : impurepoint(I) }.
 
 
 #preference(overlap, less(cardinality)){
     overlappoint(I, R1, R2) : rectangle(R1), rectangle(R2), pointid(I)
 }.
-#preference(impurity, less(weight)){
-    I,R :: impurity(R,I)
+#preference(impurity, less(cardinality)){
+    impurepoint(I): pointid(I)
 }.
 #preference(outlier, less(cardinality)){
     outlier(I) : pointid(I)
 }.
 #preference(all, lexico){
-    3::**overlap; 2::**impurity; 1::**outlier
+    overlapprio::**overlap; impurityprio::**impurity; outlierprio::**outlier
 }.
 
 #optimize(all).

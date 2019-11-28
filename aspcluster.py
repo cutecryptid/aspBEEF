@@ -23,8 +23,11 @@ HTML_REPORT_TEMPLATE_FILENAME = "report_template.html"
 POINTS_TEMPLATE_FILENAME = "points_template.js"
 RECTANGLE_TEMPLATE_FILENAME = "rectangle_template.js"
 
- # Experimental Fix to decimal numbers, probably have to deal with them dynamically
-FACTOR = 100
+#Can't deal with floats in ASP, use a factor to convert them to integers
+FACTOR = 1
+
+#Optimization priority defaults
+PRIORITYLIST = ['overlap', 'impurity', 'outlier']
 
 # Global variables
 points = None 
@@ -134,14 +137,15 @@ def build_asprin(sol_data):
     # Get clusters data and solution stats from solution
     clusters = {}
     params = []
-    for rect in sol_data["atoms"]["minrectval"]:
-        cluster_name = 'cluster' + str(rect[0])
-        if cluster_name not in clusters:
-            clusters[cluster_name] = {}
-            clusters[cluster_name]['low']  = {}
-            clusters[cluster_name]['high'] = {}
-        clusters[cluster_name]['low'][str(rect[1]).replace("\"", '')] = str(rect[2]/FACTOR)
-        clusters[cluster_name]['high'][str(rect[1]).replace("\"", '')] = str(rect[3]/FACTOR)
+    if ('minrectval' in sol_data["atoms"].keys()):
+        for rect in sol_data["atoms"]["minrectval"]:
+            cluster_name = 'cluster' + str(rect[0])
+            if cluster_name not in clusters:
+                clusters[cluster_name] = {}
+                clusters[cluster_name]['low']  = {}
+                clusters[cluster_name]['high'] = {}
+            clusters[cluster_name]['low'][str(rect[1]).replace("\"", '')] = str(rect[2]/FACTOR)
+            clusters[cluster_name]['high'][str(rect[1]).replace("\"", '')] = str(rect[3]/FACTOR)
     
     for attr in sol_data["atoms"]["selattr"]:
         params += [attr[0]]
@@ -201,26 +205,28 @@ def build_asprin(sol_data):
     report_file.close()
 
 def build_rules(sol_data):
-    clusters = {k:v for (k,v) in sol_data['atoms']['rectcluster']}
-    rev_clusters = {}
-    for k,v in clusters.items():
-        rev_clusters[v] = rev_clusters.get(v, []) + [k]
+    if('rectcluster' in sol_data['atoms'].keys()):
+        clusters = {k:v for (k,v) in sol_data['atoms']['rectcluster']}
+        rev_clusters = {}
+        for k,v in clusters.items():
+            rev_clusters[v] = rev_clusters.get(v, []) + [k]
 
-    rectvals = {}
-    for rect in sol_data['atoms']['minrectval']:
-        cluster = rect[0]
-        attr = rect[1]
-        vals = tuple(rect[2:])
-        if cluster not in rectvals.keys():
-            rectvals.update({ cluster: { attr: vals }})
-        else:
-            rectvals[cluster].update( { attr:vals } )   
+        rectvals = {}
+        for rect in sol_data['atoms']['minrectval']:
+            cluster = rect[0]
+            attr = rect[1]
+            vals = tuple(rect[2:])
+            if cluster not in rectvals.keys():
+                rectvals.update({ cluster: { attr: vals }})
+            else:
+                rectvals[cluster].update( { attr:vals } )   
 
-    clustervals = {}
-    for k,v in rev_clusters.items():
-        clustervals.update({ k: [rectvals[cl] for cl in v]})
-  
-    return clustervals
+        clustervals = {}
+        for k,v in rev_clusters.items():
+            clustervals.update({ k: [rectvals[cl] for cl in v]})
+    
+        return clustervals
+    return {}
 
 def rules_to_text(rule_dict):
     rulestr = ""
@@ -251,7 +257,7 @@ def solve_asprin(asp_program, asp_facts, clingo_args, report=False):
             line = parser.stdout.readline().rstrip()
             if not line:
                 break
-            parsed_line = line.decode('utf-8)')
+            parsed_line = line.decode('utf-8')
             sol_data = json.loads(parsed_line)
             print("FOUND SOLUTION #{0} ({1} / {2} / {3})".format(sol_data["solnum"],
                 sol_data["atoms"]["overlapcount"][0][0], sol_data["atoms"]["impurecount"][0][0],
@@ -272,10 +278,13 @@ def main():
     parser.add_argument('target', nargs='?', type=str, help="Target Classification Field if any")
     parser.add_argument('-f', '--features', type=int, default=2, help="Number of features used")
     parser.add_argument('-s', '--selfeatures', type=str, nargs='*', help="Selected features by name")
-    parser.add_argument('-n', '--nrect', type=int, default=2, help="Number of clusters")
+    parser.add_argument('-n', '--nrect', type=int, default=2, help="Number of clusters to find, use 0 to visualize the data")
     parser.add_argument('-c', '--solcount', type=int, default=1, help="Number of reported optimal solutions")
     parser.add_argument('-r', '--report', action='store_true', default=False)
     parser.add_argument('-m', '--mode', choices=['weak', 'heuristic'])
+    parser.add_argument('-of', '--only-facts', action='store_true', default=False, help="Display Logic Facts and exit")
+    parser.add_argument('-p', '--priority', nargs="+", help="Optimization factor priority. Default: overlap impurity outlier / ov im ou")
+    parser.add_argument('-ov', '--only-visualize', action='store_true', default=False, help="Reports dataset without calculating rectangles, for visualization")
 
     args = parser.parse_args()
 
@@ -301,6 +310,22 @@ def main():
         warnings.warn("Despite working with >=2 features, only the two first ones will be reported", UserWarning)
     if feature_count < 2:
         raise SystemExit('Error: Must use more than 2 features for clustering')
+
+    # Auto set FACTOR
+    with open(args.file) as csvfile:
+        factorreader = csv.reader(csvfile, delimiter=',')
+        powerfactor = 0
+        for row in factorreader:
+            for val in row:
+                try:
+                    if (isinstance(float(val), float)):
+                       sep = val.split('.')
+                       if (len(sep) == 2):
+                           powerfactor = max(powerfactor, len(sep[1]))
+                except ValueError:
+                    pass
+    global FACTOR
+    FACTOR = pow(10, powerfactor)
 
     global csv_features
     global points
@@ -334,19 +359,42 @@ def main():
     for parameter in selected_parameters:
         asp_selected_parameters += "selattr('" + parameter + "')."
 
+    if (args.priority):
+        repl_dict = { 'ov': 'overlap', 'im': 'impurity', 'ou' : 'outlier'}
+        priolist = list(map(lambda x: repl_dict[x] if x in repl_dict.keys() else x, args.priority))
+        priolist = list(filter(lambda x: x in repl_dict.values(), priolist))
+        default_prio = list(filter(lambda x: x not in priolist, PRIORITYLIST))
+        priolist = priolist + default_prio
+    else:
+        priolist = PRIORITYLIST
+    
+    if args.only_facts:
+        print(asp_facts)
+        raise SystemExit("")
+
+    show_report = args.report
+
     # Use -c selectcount=N to specify the number of dimensions of each rectangle
     # Specify the number of rectangles by changing the nrect value
-    options = [str(args.solcount)]
-    options += ['-c','nrect=' + str(args.nrect)]
+    if not args.only_visualize:
+        options = [str(args.solcount)]
+        options += ['-c','nrect=' + str(args.nrect)]
+        if args.mode is not None:
+            options += ['--approximation='+ str(args.mode) ]
+        for i,p in enumerate(priolist):
+            options += ['-c', p+'prio='+str(len(priolist)-i)]
+    else:
+        options = [1]
+        options += ['-c','nrect=0']
+        show_report = True
+    
     options += ['-c','selectcount=' + str(feature_count)]
-    if args.mode is not None:
-        options += ['--approximation='+ str(args.mode) ]
 
     if args.report:
         init_directories()
         store_command(command)
 
-    solve_asprin('rectangles_asprin', [asp_facts, asp_selected_parameters], options, report=args.report)
+    solve_asprin('rectangles_asprin', [asp_facts, asp_selected_parameters], options, report=show_report)
 
     if args.report:
         build_report_index()
