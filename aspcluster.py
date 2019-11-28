@@ -384,19 +384,19 @@ def main():
         for i,p in enumerate(priolist):
             options += ['-c', p+'prio='+str(len(priolist)-i)]
     else:
-        options = [1]
+        options = ["1"]
         options += ['-c','nrect=0']
         show_report = True
     
     options += ['-c','selectcount=' + str(feature_count)]
 
-    if args.report:
+    if show_report:
         init_directories()
         store_command(command)
 
     solve_asprin('rectangles_asprin', [asp_facts, asp_selected_parameters], options, report=show_report)
 
-    if args.report:
+    if show_report:
         build_report_index()
         # TODO: Update Home Page with each solution
         update_home_page()
