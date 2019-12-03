@@ -336,9 +336,6 @@ def main():
         datareader = csv.DictReader(csvfile)
 
         csv_features = list(datareader.fieldnames)
-
-        if args.target not in csv_features:
-            raise SystemExit("Wrong target clustering field: " + args.target)
         for att in datareader.fieldnames:
             asp_facts += "attribute('{0}'). ".format(att)
         asp_facts += "\n"
@@ -356,7 +353,9 @@ def main():
                         point.append(v)
                 asp_facts += "\n"
         except ValueError:
-            raise SystemExit("Wrong target clustering field: " + args.target)
+            print("Wrong target clustering field: " + args.target)
+            print("Maybe you meant: " + k)
+            raise SystemExit()
     
     # selected parameters facts for asp
     asp_selected_parameters = ""
