@@ -20,8 +20,6 @@ INDEX_LIST_ELEMENT_TEMPLATE_FILENAME = "index_list_element_template.html"
 HOME_INDEX_PAGE_TEMPLATE_FILENAME = "home_index_template.html"
 HOME_INDEX_LIST_ELEMENT_TEMPLATE_FILENAME = "home_index_list_element_template.html"
 HTML_REPORT_TEMPLATE_FILENAME = "report_template.html"
-POINTS_TEMPLATE_FILENAME = "points_template.js"
-RECTANGLE_TEMPLATE_FILENAME = "rectangle_template.js"
 
 #Can't deal with floats in ASP, use a factor to convert them to integers
 FACTOR = 1
@@ -121,8 +119,6 @@ def build_asprin(sol_data):
 
     # Load the templates
     report_base_template  = open(REPORT_TEMPLATE_DIR_PATH + HTML_REPORT_TEMPLATE_FILENAME, 'r').read()
-    points_template       = open(REPORT_TEMPLATE_DIR_PATH + POINTS_TEMPLATE_FILENAME, 'r').read()
-    rectangle_template    = open(REPORT_TEMPLATE_DIR_PATH + RECTANGLE_TEMPLATE_FILENAME, 'r').read()
 
 
     sol_n = sol_data["solnum"]
@@ -142,10 +138,8 @@ def build_asprin(sol_data):
             cluster_name = 'cluster' + str(rect[0])
             if cluster_name not in clusters:
                 clusters[cluster_name] = {}
-                clusters[cluster_name]['low']  = {}
-                clusters[cluster_name]['high'] = {}
-            clusters[cluster_name]['low'][str(rect[1]).replace("\"", '')] = str(rect[2]/FACTOR)
-            clusters[cluster_name]['high'][str(rect[1]).replace("\"", '')] = str(rect[3]/FACTOR)
+                clusters[cluster_name]['dimensions']  = {}
+            clusters[cluster_name]['dimensions'][str(rect[1]).replace("\"", '')] = (rect[2]/FACTOR, rect[3]/FACTOR)
     
     for attr in sol_data["atoms"]["selattr"]:
         params += [attr[0]]
@@ -169,35 +163,41 @@ def build_asprin(sol_data):
     attribute_names = param_index_names
 
     # Generate points data from points_template
-    points_data = ""
+    chart_data = {}
+    classes = []
+    point_data = []
     for class_name, values in points.items():
         filtered_values = [[v[p] for p in param_index] for v in values]
-        points_data += points_template.replace("#className#", class_name).replace("#data#", str(filtered_values))
+        classes += [class_name]
+        for v in filtered_values:
+            point = { "cluster" : class_name }
+            for i,p in enumerate(v):
+                point[param_index_names[i]] = p
+            point_data += [point]
+    
+    chart_data["classes"] = classes 
+    chart_data["points"] = point_data
+    chart_data["attributes"] = param_index_names
 
     # Generate clusters_data
-    chart_data = ""
-    for cluster, limits in clusters.items():
-        cluster_data = rectangle_template.replace("#name#", cluster)
-        cluster_data = cluster_data.replace("#x_low_limit#", limits['low'][param_index_names[0]])
-        cluster_data = cluster_data.replace("#x_high_limit#", limits['high'][param_index_names[0]])
-        cluster_data = cluster_data.replace("#y_low_limit#", limits['low'][param_index_names[1]])
-        cluster_data = cluster_data.replace("#y_high_limit#", limits['high'][param_index_names[1]])
+    rectangles = []
+    for cluster, dims in clusters.items():
+        cl = { "name" : cluster, "dimensions" : dims["dimensions"] }
+        rectangles += [cl]
 
-        chart_data += cluster_data
+    chart_data["clusters"] = rectangles
 
-    chart_data = points_data + chart_data
+    str_chart_data = json.dumps(chart_data)
 
     # Build report
     report = report_base_template.replace("#report_id#", str(sol_n)). \
         replace("#class_names#", str(list(points.keys()))). \
-        replace("#chart_data#", chart_data). \
+        replace("#chart_data#", str_chart_data). \
         replace("#overlapping#", overlapping). \
         replace("#outliercount#", outliers). \
         replace("#impurecount#", impurity). \
         replace("#x_axis_name#", param_index_names[0]). \
         replace("#y_axis_name#", param_index_names[1])
-
-    #TODO: Add all possible parameters to a axis selector dropdown
 
     # Write report file for actual solution
     report_file = open(REPORT_DIR_NAME + dataset_name + '/' + moment + '/' + str(sol_n) + "_report.html", 'w+')
@@ -306,8 +306,6 @@ def main():
 
     feature_count = max(len(selected_parameters), args.features)
 
-    if feature_count != 2 and args.report:
-        warnings.warn("Despite working with >=2 features, only the two first ones will be reported", UserWarning)
     if feature_count < 2:
         raise SystemExit('Error: Must use more than 2 features for clustering')
 
