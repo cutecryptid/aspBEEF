@@ -139,7 +139,7 @@ def build_asprin(sol_data):
             if cluster_name not in clusters:
                 clusters[cluster_name] = {}
                 clusters[cluster_name]['dimensions']  = {}
-            clusters[cluster_name]['dimensions'][str(rect[1]).replace("\"", '')] = (rect[2]/FACTOR, rect[3]/FACTOR)
+            clusters[cluster_name]['dimensions'][str(rect[1]).replace("\"", '')] = (int(rect[2])/FACTOR, int(rect[3])/FACTOR)
     
     for attr in sol_data["atoms"]["selattr"]:
         params += [attr[0]]
@@ -275,7 +275,7 @@ def main():
     # Handling command line arguments
     parser = argparse.ArgumentParser(description='Experimental ASP clustering tool')
     parser.add_argument('file', type=str, help="CSV File")
-    parser.add_argument('target', nargs='?', type=str, help="Target Classification Field if any")
+    parser.add_argument('target', type=str, help="Target Classification Field if any")
     parser.add_argument('-f', '--features', type=int, default=2, help="Number of features used")
     parser.add_argument('-s', '--selfeatures', type=str, nargs='*', help="Selected features by name")
     parser.add_argument('-n', '--nrect', type=int, default=2, help="Number of clusters to find, use 0 to visualize the data")
@@ -336,21 +336,27 @@ def main():
         datareader = csv.DictReader(csvfile)
 
         csv_features = list(datareader.fieldnames)
+
+        if args.target not in csv_features:
+            raise SystemExit("Wrong target clustering field: " + args.target)
         for att in datareader.fieldnames:
             asp_facts += "attribute('{0}'). ".format(att)
         asp_facts += "\n"
-        for i,row in enumerate(datareader):
-            point = []
-            for k,v in row.items():
-                if k == args.target:
-                    asp_facts += "cluster({0}, '{1}'). ".format(i,v.replace('-','_').lower())
-                    if v not in points:
-                        points[v] = []
-                    points[v].append(point)
-                else:
-                    asp_facts += "value({0},'{1}',{2:d}). ".format(i,k,int(float(v)*FACTOR))
-                    point.append(v)
-            asp_facts += "\n"
+        try:
+            for i,row in enumerate(datareader):
+                point = []
+                for k,v in row.items():
+                    if k == args.target:
+                        asp_facts += "cluster({0}, '{1}'). ".format(i,v.replace('-','_').lower())
+                        if v not in points:
+                            points[v] = []
+                        points[v].append(point)
+                    else:
+                        asp_facts += "value({0},'{1}',{2:d}). ".format(i,k,int(float(v)*FACTOR))
+                        point.append(v)
+                asp_facts += "\n"
+        except ValueError:
+            raise SystemExit("Wrong target clustering field: " + args.target)
     
     # selected parameters facts for asp
     asp_selected_parameters = ""
