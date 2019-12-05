@@ -27,7 +27,7 @@ def main():
     cl = KMeans(n_clusters = args.k).fit(X)
     labels_pred = cl.predict(X)
     centroids = cl.cluster_centers_
-    data = data.assign(pred = labels_pred)
+    data = data.assign(predtarget = labels_pred)
 
     # Data now contains the original data with the predicted cluster
     # Detect Factor prior to transforming data to ASP
@@ -51,18 +51,19 @@ def main():
         asp_facts += "attribute('{0}'). ".format(att)
     asp_facts += "\n"
     if args.target:
-        asp_facts += "target('c_{0}').\n".format(args.target)
+        asp_facts += "classtarget('{0}').\n".format(args.target)
+    asp_facts += "predtarget('predtarget').\n"
     for i,d in enumerate(dicts):
         for k,v in d.items():
             if k == args.target:
                 asp_facts += "class({0}, 'c_{1}'). ".format(i,str(v).replace('-','_').lower())
-            elif k == 'pred':
+            elif k == 'predtarget':
                 asp_facts += "cluster({0}, 'p_{1}'). ".format(i,str(v).replace('-','_').lower())
             else:
                 asp_facts += "value({0},'{1}',{2:d}). ".format(i,k,int(float(v)*FACTOR))
         asp_facts += "\n"
     
-    print(asp_facts)
+    
 
 if __name__ == "__main__":
     main()
