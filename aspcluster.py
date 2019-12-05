@@ -236,7 +236,7 @@ def rules_to_text(rule_dict):
             rulestr += "  Rule #{0}\n".format(idx)
             for attr,val in rect.items():
                 rulestr += "    {a} is between {l} and {h}\n".format(
-                    a = attr, l = val[0], h = val[1]
+                    a = attr, l = int(val[0])/FACTOR, h = int(val[1])/FACTOR
                 )
     return rulestr
     
