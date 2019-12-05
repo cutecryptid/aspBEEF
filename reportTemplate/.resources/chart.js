@@ -154,9 +154,6 @@ $(document).ready(function(){
     updatePoints(xVal, yVal, chart, options);
 
     $('select').change(function() { 
-        oldxVal = xVal;
-        oldyVal = yVal;
-
         xVal = $xAxisDrop[0].selectedOptions[0].value;
         yVal = $yAxisDrop[0].selectedOptions[0].value;
 
