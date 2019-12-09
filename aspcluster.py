@@ -287,6 +287,7 @@ def main():
     parser.add_argument('-of', '--only-facts', action='store_true', default=False, help="Display Logic Facts and exit")
     parser.add_argument('-p', '--priority', nargs="+", help="Optimization factor priority. Default: overlap impurity outlier / ov im ou")
     parser.add_argument('-ov', '--only-visualize', action='store_true', default=False, help="Reports dataset without calculating rectangles, for visualization")
+    parser.add_argument('-fr', '--fringe', type=float, default=0.5)
 
     args = parser.parse_args()
 
@@ -338,10 +339,14 @@ def main():
     global FACTOR
     FACTOR = pow(10, powerfactor)
 
+    # Extract fringe cluster values
+    clgroups = data.groupby('predtarget').agg([min, max]).to_dict(orient='records')
+
     global points
     global data_features
     dicts = data.to_dict(orient='records')
     asp_facts = ""
+    fringe_facts = ""
     points = {}
     data_features = list(dicts[0].keys())
     for att in data_features:
@@ -362,13 +367,23 @@ def main():
                         points[v] = []
                     points[v].append(point)
                 else:
+                    cluster = d['predtarget']
+                    attrmax = clgroups[cluster][(k, 'max')]
+                    attrmin = clgroups[cluster][(k, 'min')]
+                    attrdst = attrmax - attrmin
+                    frmin = attrmin + (attrdst * args.fringe)
+                    frmax = attrmax - (attrdst * args.fringe)
                     asp_facts += "value({0},'{1}',{2:d}). ".format(i,k,int(float(v)*FACTOR))
+                    if not(frmin <= v <= frmax):
+                        fringe_facts += "fringevalue('p_{2}','{0}',{1:d}). ".format(k,int(float(v)*FACTOR),cluster)
                     point.append(v)
             asp_facts += "\n"
     except ValueError:
         print("Wrong target clustering field: " + args.target)
         print("Maybe you meant: " + k)
         raise SystemExit()
+
+    asp_facts += fringe_facts
     
     # selected parameters facts for asp
     asp_selected_parameters = ""

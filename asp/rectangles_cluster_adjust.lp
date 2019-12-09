@@ -11,7 +11,7 @@ rectangle(R) :- cluster(R).
 
 selectcount { selattr(A):attribute(A), not classtarget(A), not predtarget(A) } selectcount.
 
-2 { rectval(R,A,V) : clusterval(R,A,V) } 2 :- rectangle(R), selattr(A).
+2 { rectval(R,A,V) : fringevalue(R,A,V) } 2 :- rectangle(R), selattr(A).
 
 attrinlier(R,I,A) :- value(I,A,V), rectval(R,A,V0), rectval(R,A,V1), V >= V0, V <= V1, V0 < V1.
 attroutlier(R,I,A) :- value(I,A,V), rectval(R,A,V0), rectval(R,A,V1), V < V0, V0 < V1.
