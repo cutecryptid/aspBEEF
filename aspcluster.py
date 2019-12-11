@@ -344,7 +344,7 @@ def main():
                 point = []
                 for k,v in row.items():
                     if k == args.target:
-                        asp_facts += "cluster({0}, '{1}'). ".format(i,v.replace('-','_').lower())
+                        asp_facts += "cluster({0}, 'c_{1}'). ".format(i,v.replace('-','_').lower())
                         if v not in points:
                             points[v] = []
                         points[v].append(point)
