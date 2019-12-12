@@ -257,6 +257,13 @@ def solve_asprin(asp_program, asp_facts, clingo_args, report=False):
             line = parser.stdout.readline().rstrip()
             if not line:
                 break
+            try:
+                parsed_line = line.decode('utf-8')
+                sol_data = json.loads(parsed_line)
+            except:
+                print(parsed_line)
+                print("Solver trace: " + process.stderr.readline().rstrip().decode('utf-8'))
+                break
             parsed_line = line.decode('utf-8')
             sol_data = json.loads(parsed_line)
             print("FOUND SOLUTION #{0} ({1} / {2} / {3})".format(sol_data["solnum"],
