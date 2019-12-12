@@ -256,14 +256,16 @@ def solve_asprin(asp_program, asp_facts, clingo_args, report=False):
         process = Popen(["asprin", temp_file.name] + clingo_args, stdout=PIPE, stderr=PIPE)
         parser = Popen(["./asparser/asparser"], stdin=process.stdout, stdout=PIPE, stderr=PIPE)
         while True:
-            errline = process.stderr.readline().rstrip()
-            if errline:
-                print(errline)
             line = parser.stdout.readline().rstrip()
             if not line:
                 break
-            parsed_line = line.decode('utf-8')
-            sol_data = json.loads(parsed_line)
+            try:
+                parsed_line = line.decode('utf-8')
+                sol_data = json.loads(parsed_line)
+            except:
+                print(parsed_line)
+                print("Solver trace: " + process.stderr.readline().rstrip().decode('utf-8'))
+                break
             print("FOUND SOLUTION #{0} ({1} / {2} / {3})".format(sol_data["solnum"],
                 sol_data["atoms"]["overlapcount"][0][0], sol_data["atoms"]["impurecount"][0][0],
                 sol_data["atoms"]["outliercount"][0][0]))
