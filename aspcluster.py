@@ -7,6 +7,8 @@ import warnings
 from subprocess import PIPE, Popen
 from sys import argv
 from datetime import datetime
+import pandas as pd
+from sklearn.cluster import KMeans
 import ntpath
 import webbrowser
 from distutils.dir_util import copy_tree, remove_tree
@@ -29,7 +31,7 @@ PRIORITYLIST = ['overlap', 'impurity', 'outlier']
 
 # Global variables
 points = None 
-csv_features = None
+data_features = None
 index_page_data = {}
 sol_n = 0
 selected_attributes = None
@@ -153,9 +155,9 @@ def build_asprin(sol_data):
     impurity = str(sol_data["atoms"]["impurecount"][0][0])
     index_page_data[sol_n]['impurity'] = impurity
     
-    param_index = [csv_features.index(x) for x in params]
+    param_index = [data_features.index(x) for x in params]
     param_index = sorted(param_index)
-    param_index_names = [csv_features[x] for x in param_index]
+    param_index_names = [data_features[x] for x in param_index]
 
     global selected_attributes
     global attribute_names
@@ -264,8 +266,6 @@ def solve_asprin(asp_program, asp_facts, clingo_args, report=False):
                 print(parsed_line)
                 print("Solver trace: " + process.stderr.readline().rstrip().decode('utf-8'))
                 break
-            parsed_line = line.decode('utf-8')
-            sol_data = json.loads(parsed_line)
             print("FOUND SOLUTION #{0} ({1} / {2} / {3})".format(sol_data["solnum"],
                 sol_data["atoms"]["overlapcount"][0][0], sol_data["atoms"]["impurecount"][0][0],
                 sol_data["atoms"]["outliercount"][0][0]))
@@ -282,16 +282,18 @@ def main():
     # Handling command line arguments
     parser = argparse.ArgumentParser(description='Experimental ASP clustering tool')
     parser.add_argument('file', type=str, help="CSV File")
-    parser.add_argument('target', type=str, help="Target Classification Field if any")
+    parser.add_argument('target', nargs='?', type=str, help="Target Classification Field if any")
+    parser.add_argument('-k', type=int, help="Number of clusters")
     parser.add_argument('-f', '--features', type=int, default=2, help="Number of features used")
     parser.add_argument('-s', '--selfeatures', type=str, nargs='*', help="Selected features by name")
-    parser.add_argument('-n', '--nrect', type=int, default=2, help="Number of clusters to find, use 0 to visualize the data")
     parser.add_argument('-c', '--solcount', type=int, default=1, help="Number of reported optimal solutions")
     parser.add_argument('-r', '--report', action='store_true', default=False)
-    parser.add_argument('-m', '--mode', choices=['weak', 'heuristic'])
+    parser.add_argument('-hm', '--heurmode', choices=['weak', 'heuristic'])
     parser.add_argument('-of', '--only-facts', action='store_true', default=False, help="Display Logic Facts and exit")
     parser.add_argument('-p', '--priority', nargs="+", help="Optimization factor priority. Default: overlap impurity outlier / ov im ou")
     parser.add_argument('-ov', '--only-visualize', action='store_true', default=False, help="Reports dataset without calculating rectangles, for visualization")
+    parser.add_argument('-a', '--approximate', action='store_true', default=False, help="Approximates rectangles to KMeans Clusters instead of finding pure clusters")
+    parser.add_argument('-fr', '--fringe', type=float, default=0.5)
 
     args = parser.parse_args()
 
@@ -316,53 +318,81 @@ def main():
     if feature_count < 2:
         raise SystemExit('Error: Must use more than 2 features for clustering')
 
-    # Auto set FACTOR
-    with open(args.file) as csvfile:
-        factorreader = csv.reader(csvfile, delimiter=',')
-        powerfactor = 0
-        for row in factorreader:
-            for val in row:
-                try:
-                    if (isinstance(float(val), float)):
-                       sep = val.split('.')
-                       if (len(sep) == 2):
-                           powerfactor = max(powerfactor, len(sep[1]))
-                except ValueError:
-                    pass
+    data = pd.read_csv(args.file)
+    
+    X = data
+    if args.target:
+        X = X.drop(columns=[args.target])
+        if (args.approximate):
+            cl = KMeans(n_clusters = args.k).fit(X)
+            labels_pred = cl.predict(X)
+            #centroids = cl.cluster_centers_
+        else:
+            labels_pred = data[args.target]
+        data = data.assign(predtarget = labels_pred)
+        # Extract fringe cluster values
+        clgroups = data.groupby('predtarget').agg([min, max]).to_dict(orient='records')
+
+    # Data now contains the original data with the predicted cluster
+    # Detect Factor prior to transforming data to ASP
+    powerfactor = 0
+    for index, row in X.iterrows():
+        for val in row:
+            try:
+                if (isinstance(val, float)):
+                    sep = str(val).split('.')
+                    if (len(sep) == 2):
+                        powerfactor = max(powerfactor, len(sep[1]))
+            except ValueError:
+                pass
+    
     global FACTOR
     FACTOR = pow(10, powerfactor)
 
-    global csv_features
-    global points
-    # Csv data to ASP facts & points
-    with open(args.file) as csvfile:
-        asp_facts = ""
-        points = {}
-        if args.target:
-            asp_facts += "target('{0}').\n".format(args.target)
-        datareader = csv.DictReader(csvfile)
+    #TODO: Manage fringe values, not include them for non-approximate approach
 
-        csv_features = list(datareader.fieldnames)
-        for att in datareader.fieldnames:
-            asp_facts += "attribute('{0}'). ".format(att)
-        asp_facts += "\n"
-        try:
-            for i,row in enumerate(datareader):
-                point = []
-                for k,v in row.items():
-                    if k == args.target:
-                        asp_facts += "cluster({0}, 'c_{1}'). ".format(i,v.replace('-','_').lower())
-                        if v not in points:
-                            points[v] = []
-                        points[v].append(point)
-                    else:
-                        asp_facts += "value({0},'{1}',{2:d}). ".format(i,k,int(float(v)*FACTOR))
-                        point.append(v)
-                asp_facts += "\n"
-        except ValueError:
-            print("Wrong target clustering field: " + args.target)
-            print("Maybe you meant: " + k)
-            raise SystemExit()
+    global points
+    global data_features
+    dicts = data.to_dict(orient='records')
+    asp_facts = ""
+    fringe_facts = ""
+    points = {}
+    data_features = list(dicts[0].keys())
+    for att in data_features:
+        asp_facts += "attribute('{0}'). ".format(att)
+    asp_facts += "\n"
+    if args.target:
+        asp_facts += "classtarget('{0}').\n".format(args.target)
+    asp_facts += "predtarget('predtarget').\n"
+    try:
+        for i,d in enumerate(dicts):
+            point = []
+            for k,v in d.items():
+                if k == args.target:
+                    asp_facts += "class({0}, 'c_{1}'). ".format(i,str(v).replace('-','_').lower())
+                elif k == 'predtarget':
+                    asp_facts += "cluster({0}, 'p_{1}'). ".format(i,str(v).replace('-','_').lower())
+                    if v not in points:
+                        points[v] = []
+                    points[v].append(point)
+                else:
+                    cluster = d['predtarget']
+                    attrmax = clgroups[cluster][(k, 'max')]
+                    attrmin = clgroups[cluster][(k, 'min')]
+                    attrdst = attrmax - attrmin
+                    frmin = attrmin + (attrdst * args.fringe)
+                    frmax = attrmax - (attrdst * args.fringe)
+                    asp_facts += "value({0},'{1}',{2:d}). ".format(i,k,int(float(v)*FACTOR))
+                    if not(frmin <= v <= frmax):
+                        fringe_facts += "fringevalue('p_{2}','{0}',{1:d}). ".format(k,int(float(v)*FACTOR),cluster)
+                    point.append(v)
+            asp_facts += "\n"
+    except ValueError:
+        print("Wrong target clustering field: " + args.target)
+        print("Maybe you meant: " + k)
+        raise SystemExit()
+
+    asp_facts += fringe_facts
     
     # selected parameters facts for asp
     asp_selected_parameters = ""
@@ -388,14 +418,12 @@ def main():
     # Specify the number of rectangles by changing the nrect value
     if not args.only_visualize:
         options = [str(args.solcount)]
-        options += ['-c','nrect=' + str(args.nrect)]
         if args.mode is not None:
             options += ['--approximation='+ str(args.mode) ]
         for i,p in enumerate(priolist):
             options += ['-c', p+'prio='+str(len(priolist)-i)]
     else:
         options = ["1"]
-        options += ['-c','nrect=0']
         show_report = True
     
     options += ['-c','selectcount=' + str(feature_count)]
@@ -404,8 +432,13 @@ def main():
         init_directories()
         store_command(command)
 
-    solve_asprin('rectangles_asprin', [asp_facts, asp_selected_parameters], options, report=show_report)
-
+    if args.approximate:
+        script = 'rectangles_cluster_adjust'
+    else:
+        script = 'rectangles_asprin'
+    
+    solve_asprin(script, [asp_facts, asp_selected_parameters], options, report=show_report)
+    
     if show_report:
         build_report_index()
         # TODO: Update Home Page with each solution
