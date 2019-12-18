@@ -418,8 +418,8 @@ def main():
     # Specify the number of rectangles by changing the nrect value
     if not args.only_visualize:
         options = [str(args.solcount)]
-        if args.mode is not None:
-            options += ['--approximation='+ str(args.mode) ]
+        if args.heurmode is not None:
+            options += ['--approximation='+ str(args.heurmode) ]
         for i,p in enumerate(priolist):
             options += ['-c', p+'prio='+str(len(priolist)-i)]
     else:
