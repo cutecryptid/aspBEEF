@@ -283,7 +283,7 @@ def main():
     parser = argparse.ArgumentParser(description='Experimental ASP clustering tool')
     parser.add_argument('file', type=str, help="CSV File")
     parser.add_argument('target', nargs='?', type=str, help="Target Classification Field if any")
-    parser.add_argument('-k', type=int, help="Number of clusters")
+    parser.add_argument('-k', type=int, default=2, help="Number of clusters")
     parser.add_argument('-f', '--features', type=int, default=2, help="Number of features used")
     parser.add_argument('-s', '--selfeatures', type=str, nargs='*', help="Selected features by name")
     parser.add_argument('-c', '--solcount', type=int, default=1, help="Number of reported optimal solutions")
@@ -376,15 +376,16 @@ def main():
                         points[v] = []
                     points[v].append(point)
                 else:
-                    cluster = d['predtarget']
-                    attrmax = clgroups[cluster][(k, 'max')]
-                    attrmin = clgroups[cluster][(k, 'min')]
-                    attrdst = attrmax - attrmin
-                    frmin = attrmin + (attrdst * args.fringe)
-                    frmax = attrmax - (attrdst * args.fringe)
+                    if (args.approximate):
+                        cluster = d['predtarget']
+                        attrmax = clgroups[cluster][(k, 'max')]
+                        attrmin = clgroups[cluster][(k, 'min')]
+                        attrdst = attrmax - attrmin
+                        frmin = attrmin + (attrdst * args.fringe)
+                        frmax = attrmax - (attrdst * args.fringe)
+                        if not(frmin <= v <= frmax):
+                            fringe_facts += "fringevalue('p_{2}','{0}',{1:d}). ".format(k,int(float(v)*FACTOR),cluster)
                     asp_facts += "value({0},'{1}',{2:d}). ".format(i,k,int(float(v)*FACTOR))
-                    if not(frmin <= v <= frmax):
-                        fringe_facts += "fringevalue('p_{2}','{0}',{1:d}). ".format(k,int(float(v)*FACTOR),cluster)
                     point.append(v)
             asp_facts += "\n"
     except ValueError:
@@ -422,9 +423,13 @@ def main():
             options += ['--approximation='+ str(args.heurmode) ]
         for i,p in enumerate(priolist):
             options += ['-c', p+'prio='+str(len(priolist)-i)]
-    else:
+    elif not args.approximate:
         options = ["1"]
+        options += ['-c','nrect=0']
         show_report = True
+    
+    if not args.approximate:
+        options += ['-c','nrect=' + str(args.k)]
     
     options += ['-c','selectcount=' + str(feature_count)]
 
