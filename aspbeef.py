@@ -254,7 +254,7 @@ def solve_asprin(asp_program, asp_facts, clingo_args, report=False):
         temp_file.write(program.encode())
         temp_file.flush()
         process = Popen(["asprin", temp_file.name] + clingo_args, stdout=PIPE, stderr=PIPE)
-        parser = Popen(["./asparser/asparser"], stdin=process.stdout, stdout=PIPE, stderr=PIPE)
+        parser = Popen(["./lib/asparser/asparser"], stdin=process.stdout, stdout=PIPE, stderr=PIPE)
         while True:
             line = parser.stdout.readline().rstrip()
             if not line:
