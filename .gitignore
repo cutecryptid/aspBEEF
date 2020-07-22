@@ -2,3 +2,4 @@ tmp/**/**
 htmlReports/*
 asparser/**/**
 input/generated/**
+*.csv

@@ -276,7 +276,7 @@ def solve_asprin(asp_program, asp_facts, clingo_args, report=False):
                 build_asprin(sol_data)
             
             
-def main():
+def main(raw_args=None):
     os.environ["PYTHONUNBUFFERED"] = "TRUE"
 
     # Handling command line arguments
@@ -295,7 +295,7 @@ def main():
     parser.add_argument('-a', '--approximate', action='store_true', default=False, help="Approximates rectangles to KMeans Clusters instead of finding pure clusters")
     parser.add_argument('-fr', '--fringe', type=float, default=0.5)
 
-    args = parser.parse_args()
+    args = parser.parse_args(raw_args)
 
     # Setting up some global variables for report generation
     global dataset_name
