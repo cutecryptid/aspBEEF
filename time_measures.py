@@ -4,6 +4,7 @@ import argparse
 import time
 import tempfile
 from itertools import product
+from random import shuffle
 
 def main():
     parser = argparse.ArgumentParser(description='Experimental ASP clustering tool')
@@ -17,22 +18,16 @@ def main():
     data_no_target = data.drop(columns=[args.target])
     dicts = data_no_target.to_dict(orient='records')
     data_features = list(dicts[0].keys())
-
-    fixed_attr = []
-    for i in range(len(data_features)+1):
-        if i > 1:
-            fixed_attr.append(data_features[0:i])
     
-    free_attr = list(range(2,5))
+    attr_sizes = list(range(2,5))
     sample_sizes = [60, 90, 150]
 
     
-    free_cases = product(free_attr, sample_sizes)
-    fixed_cases = product(fixed_attr, sample_sizes)
+    cases = product(attr_sizes, sample_sizes)
 
     with open("beeftimes.csv", "w") as outfile:
         outfile.write("sample_size,\tfeatures,\tfixed,\ttime\n")
-        for attr,samp in free_cases:
+        for attr,samp in cases:
             with tempfile.NamedTemporaryFile() as temp_file:
                 sample = data.sample(samp)
                 sample.to_csv(temp_file.name, index=False)
@@ -48,11 +43,16 @@ def main():
             
             outfile.write(f"{samp},\t{attr},\tfalse,\t{avg_exectime:.4}\n")
         
-        for attr,samp in fixed_cases:
+        for attr,samp in cases:
             with tempfile.NamedTemporaryFile() as temp_file:
                 sample = data.sample(samp)
                 sample.to_csv(temp_file.name, index=False)
-                beefargs = [temp_file.name, args.target, "-k", str(args.k), "-hm", "weak", "--approximate", "-s"] + attr
+
+                sel_attr = []
+                rand_features = shuffle(data_features)
+                sel_attr = rand_features[2:attr]
+
+                beefargs = [temp_file.name, args.target, "-k", str(args.k), "-hm", "weak", "--approximate", "-f", str(attr), "-s"] + attr
                 
                 exectime = 0
                 for i in range(args.iters):
