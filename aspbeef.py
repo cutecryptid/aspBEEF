@@ -364,6 +364,7 @@ def main(raw_args=None):
     if args.target:
         asp_facts += "classtarget('{0}').\n".format(args.target)
     asp_facts += "predtarget('predtarget').\n"
+    categorical_fields = []
     try:
         for i,d in enumerate(dicts):
             point = []
@@ -389,8 +390,12 @@ def main(raw_args=None):
                     point.append(v)
             asp_facts += "\n"
     except ValueError:
-        print("Wrong target clustering field: " + args.target)
-        print("Maybe you meant: " + k)
+        categorical_fields += [k]
+    
+    if (len(categorical_fields)>0):
+        print("Found some categorical fields that are not the target")
+        print(", ".join(categorical_fields))
+        print("Please encode them to numerical ordered data or try changing the target field")
         raise SystemExit()
 
     asp_facts += fringe_facts

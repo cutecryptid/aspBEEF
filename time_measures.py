@@ -4,7 +4,7 @@ import argparse
 import time
 import tempfile
 from itertools import product
-from random import shuffle
+import random
 
 def main():
     parser = argparse.ArgumentParser(description='Experimental ASP clustering tool')
@@ -25,44 +25,34 @@ def main():
     
     cases = product(attr_sizes, sample_sizes)
 
+
     with open("beeftimes.csv", "w") as outfile:
-        outfile.write("sample_size,\tfeatures,\tfixed,\ttime\n")
+        outfile.write("sample_size,\tfeatures,\tfreetime,\tfixedtime\n")
         for attr,samp in cases:
             with tempfile.NamedTemporaryFile() as temp_file:
                 sample = data.sample(samp)
                 sample.to_csv(temp_file.name, index=False)
-                beefargs = [temp_file.name, args.target, "-k", str(args.k), "-hm", "weak", "--approximate", "-f", str(attr)]
 
-                exectime = 0
+                beefargs_free = [temp_file.name, args.target, "-k", str(args.k), "-hm", "weak", "--approximate", "-f", str(attr)]
+
+                free_exectime = 0
+                fixed_exectime = 0
                 for i in range(args.iters):
                     start = time.time()
-                    beef(beefargs)
+                    beef(beefargs_free)
                     end = time.time()
-                    exectime += end-start
-                avg_exectime = exectime/args.iters
+                    free_exectime += end-start
+
+                    sel_features = random.sample(data_features, attr)
+                    beefargs_sel = [temp_file.name, args.target, "-k", str(args.k), "-hm", "weak", "--approximate", "-f", str(attr), "-s"] + sel_features
+                    start = time.time()
+                    beef(beefargs_sel)
+                    end = time.time()
+                    fixed_exectime += end-start
+                avg_exectime_free = free_exectime/args.iters
+                avg_exectime_fixed = fixed_exectime/args.iters
             
-            outfile.write(f"{samp},\t{attr},\tfalse,\t{avg_exectime:.4}\n")
-        
-        for attr,samp in cases:
-            with tempfile.NamedTemporaryFile() as temp_file:
-                sample = data.sample(samp)
-                sample.to_csv(temp_file.name, index=False)
-
-                sel_attr = []
-                rand_features = shuffle(data_features)
-                sel_attr = rand_features[2:attr]
-
-                beefargs = [temp_file.name, args.target, "-k", str(args.k), "-hm", "weak", "--approximate", "-f", str(attr), "-s"] + attr
-                
-                exectime = 0
-                for i in range(args.iters):
-                    start = time.time()
-                    beef(beefargs)
-                    end = time.time()
-                    exectime += end-start
-                avg_exectime = exectime/args.iters
-
-            outfile.write(f"{samp},\t{len(attr)},\ttrue,\t{avg_exectime:.4}\n")
+            outfile.write(f"{samp},\t{attr},\t{avg_exectime_free:.4f}\t{avg_exectime_fixed:.4f}\n")
 
 
 

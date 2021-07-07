@@ -1,0 +1,391 @@
+asprin version 3.1.0
+Reading from asp/rectangles_asprin.lp ...
+#program base.
+_end.
+
+_end.
+
+_end.
+
+_end.
+
+_end.
+
+
+rectangle(1..nrect).
+
+pointid(I) :- value(I,A,V).
+attribute(A) :- value(I, A, V).
+cluster(CL) :- cluster(I,CL).
+
+selectcount { selattr(A):attribute(A), not target(A) } selectcount.
+
+2 { rectval(R,A,V) : value(_,A,V) } 2 :- rectangle(R), selattr(A).
+
+attrinlier(R,I,A) :- value(I,A,V), rectval(R,A,V0), rectval(R,A,V1), V >= V0, V <= V1, V0 < V1.
+attroutlier(R,I,A) :- value(I,A,V), rectval(R,A,V0), rectval(R,A,V1), V < V0, V0 < V1.
+attroutlier(R,I,A) :- value(I,A,V), rectval(R,A,V0), rectval(R,A,V1), V > V1, V0 < V1.
+
+rectoutlier(R, I) :- attroutlier(R,I,A).
+rectinlier(R, I) :- attrinlier(R,I,A), not rectoutlier(R,I).
+
+rectinliercount(R,C) :- rectangle(R), C=#count{ I : rectinlier(R,I) }.
+
+inlier(I) :- rectinlier(R, I).
+outlier(I) :- pointid(I), not inlier(I).
+
+% An overlapping point is a single point that belongs to two rectangles
+overlappoint(I, R1, R2) :- rectinlier(R1, I), rectinlier(R2, I), R1 < R2.
+
+impure(R) :- rectangle(R), rectinlier(R,I1), rectinlier(R,I2), I1 < I2,
+                cluster(I1, C1), cluster(I2, C2), C1 != C2.
+
+% Given an impure rectangle and a cluster, how many points are not of that cluster
+impurity(R,CL1,IC) :- impure(R), cluster(CL1), 
+            IC=#count{ I: cluster(I, CL2), CL2 != CL1, rectinlier(R,I) }.
+% The minimal number of impurity determines the purest cluster of a rectangle
+impurity(R,M) :- impure(R), M=#min{ CLI : impurity(R,CL,CLI)}.
+
+rectcluster(R, CL) :- rectangle(R), not impure(R), rectinlier(R,I), cluster(I, CL).
+rectcluster(R, CL) :- impure(R), impurity(R,IM), impurity(R,CL,IM).
+
+impurepoint(I) :- rectinlier(R,I), impure(R), cluster(I,CLI), rectcluster(R,CLR), CLI != CLR.
+
+minrectval(R,A,V0,V1) :- rectangle(R), selattr(A), V0=#min{ V : rectinlier(R,I), value(I,A,V) },
+                            V1=#max{ V : rectinlier(R,I), value(I,A,V) }.
+
+:- rectangle(R), not rectinlier(R, _).
+:- rectangle(R), rectcluster(R,CL1), rectcluster(R,CL2), CL1 != CL2.
+
+outliercount(C) :- C=#count{ I : outlier(I) }.
+overlapcount(C) :- C=#count{ I : overlappoint(I, R1, R2) }.
+impurecount(C) :- C=#count{ I : impurepoint(I) }.
+
+
+_end.
+
+_end.
+
+_end.
+
+_end.
+
+
+_end.
+
+
+#show minrectval/4.
+#show rectinliercount/2.
+#show rectcluster/2.
+#show outliercount/1.
+#show overlapcount/1.
+#show impurecount/1.
+#show selattr/1.
+_end.
+attribute('sepal_length'). attribute('sepal_width'). attribute('petal_length'). attribute('petal_width'). attribute('species'). attribute('predtarget'). 
+classtarget('species').
+predtarget('predtarget').
+value(0,'sepal_length',51). value(0,'sepal_width',35). value(0,'petal_length',14). value(0,'petal_width',2). class(0, 'c_iris_setosa'). cluster(0, 'p_iris_setosa'). 
+value(1,'sepal_length',49). value(1,'sepal_width',30). value(1,'petal_length',14). value(1,'petal_width',2). class(1, 'c_iris_setosa'). cluster(1, 'p_iris_setosa'). 
+value(2,'sepal_length',47). value(2,'sepal_width',32). value(2,'petal_length',13). value(2,'petal_width',2). class(2, 'c_iris_setosa'). cluster(2, 'p_iris_setosa'). 
+value(3,'sepal_length',46). value(3,'sepal_width',31). value(3,'petal_length',15). value(3,'petal_width',2). class(3, 'c_iris_setosa'). cluster(3, 'p_iris_setosa'). 
+value(4,'sepal_length',50). value(4,'sepal_width',36). value(4,'petal_length',14). value(4,'petal_width',2). class(4, 'c_iris_setosa'). cluster(4, 'p_iris_setosa'). 
+value(5,'sepal_length',54). value(5,'sepal_width',39). value(5,'petal_length',17). value(5,'petal_width',4). class(5, 'c_iris_setosa'). cluster(5, 'p_iris_setosa'). 
+value(6,'sepal_length',46). value(6,'sepal_width',34). value(6,'petal_length',14). value(6,'petal_width',3). class(6, 'c_iris_setosa'). cluster(6, 'p_iris_setosa'). 
+value(7,'sepal_length',50). value(7,'sepal_width',34). value(7,'petal_length',15). value(7,'petal_width',2). class(7, 'c_iris_setosa'). cluster(7, 'p_iris_setosa'). 
+value(8,'sepal_length',44). value(8,'sepal_width',29). value(8,'petal_length',14). value(8,'petal_width',2). class(8, 'c_iris_setosa'). cluster(8, 'p_iris_setosa'). 
+value(9,'sepal_length',49). value(9,'sepal_width',31). value(9,'petal_length',15). value(9,'petal_width',1). class(9, 'c_iris_setosa'). cluster(9, 'p_iris_setosa'). 
+value(10,'sepal_length',54). value(10,'sepal_width',37). value(10,'petal_length',15). value(10,'petal_width',2). class(10, 'c_iris_setosa'). cluster(10, 'p_iris_setosa'). 
+value(11,'sepal_length',48). value(11,'sepal_width',34). value(11,'petal_length',16). value(11,'petal_width',2). class(11, 'c_iris_setosa'). cluster(11, 'p_iris_setosa'). 
+value(12,'sepal_length',48). value(12,'sepal_width',30). value(12,'petal_length',14). value(12,'petal_width',1). class(12, 'c_iris_setosa'). cluster(12, 'p_iris_setosa'). 
+value(13,'sepal_length',43). value(13,'sepal_width',30). value(13,'petal_length',11). value(13,'petal_width',1). class(13, 'c_iris_setosa'). cluster(13, 'p_iris_setosa'). 
+value(14,'sepal_length',58). value(14,'sepal_width',40). value(14,'petal_length',12). value(14,'petal_width',2). class(14, 'c_iris_setosa'). cluster(14, 'p_iris_setosa'). 
+value(15,'sepal_length',57). value(15,'sepal_width',44). value(15,'petal_length',15). value(15,'petal_width',4). class(15, 'c_iris_setosa'). cluster(15, 'p_iris_setosa'). 
+value(16,'sepal_length',54). value(16,'sepal_width',39). value(16,'petal_length',13). value(16,'petal_width',4). class(16, 'c_iris_setosa'). cluster(16, 'p_iris_setosa'). 
+value(17,'sepal_length',51). value(17,'sepal_width',35). value(17,'petal_length',14). value(17,'petal_width',3). class(17, 'c_iris_setosa'). cluster(17, 'p_iris_setosa'). 
+value(18,'sepal_length',57). value(18,'sepal_width',38). value(18,'petal_length',17). value(18,'petal_width',3). class(18, 'c_iris_setosa'). cluster(18, 'p_iris_setosa'). 
+value(19,'sepal_length',51). value(19,'sepal_width',38). value(19,'petal_length',15). value(19,'petal_width',3). class(19, 'c_iris_setosa'). cluster(19, 'p_iris_setosa'). 
+value(20,'sepal_length',54). value(20,'sepal_width',34). value(20,'petal_length',17). value(20,'petal_width',2). class(20, 'c_iris_setosa'). cluster(20, 'p_iris_setosa'). 
+value(21,'sepal_length',51). value(21,'sepal_width',37). value(21,'petal_length',15). value(21,'petal_width',4). class(21, 'c_iris_setosa'). cluster(21, 'p_iris_setosa'). 
+value(22,'sepal_length',46). value(22,'sepal_width',36). value(22,'petal_length',10). value(22,'petal_width',2). class(22, 'c_iris_setosa'). cluster(22, 'p_iris_setosa'). 
+value(23,'sepal_length',51). value(23,'sepal_width',33). value(23,'petal_length',17). value(23,'petal_width',5). class(23, 'c_iris_setosa'). cluster(23, 'p_iris_setosa'). 
+value(24,'sepal_length',48). value(24,'sepal_width',34). value(24,'petal_length',19). value(24,'petal_width',2). class(24, 'c_iris_setosa'). cluster(24, 'p_iris_setosa'). 
+value(25,'sepal_length',50). value(25,'sepal_width',30). value(25,'petal_length',16). value(25,'petal_width',2). class(25, 'c_iris_setosa'). cluster(25, 'p_iris_setosa'). 
+value(26,'sepal_length',50). value(26,'sepal_width',34). value(26,'petal_length',16). value(26,'petal_width',4). class(26, 'c_iris_setosa'). cluster(26, 'p_iris_setosa'). 
+value(27,'sepal_length',52). value(27,'sepal_width',35). value(27,'petal_length',15). value(27,'petal_width',2). class(27, 'c_iris_setosa'). cluster(27, 'p_iris_setosa'). 
+value(28,'sepal_length',52). value(28,'sepal_width',34). value(28,'petal_length',14). value(28,'petal_width',2). class(28, 'c_iris_setosa'). cluster(28, 'p_iris_setosa'). 
+value(29,'sepal_length',47). value(29,'sepal_width',32). value(29,'petal_length',16). value(29,'petal_width',2). class(29, 'c_iris_setosa'). cluster(29, 'p_iris_setosa'). 
+value(30,'sepal_length',48). value(30,'sepal_width',31). value(30,'petal_length',16). value(30,'petal_width',2). class(30, 'c_iris_setosa'). cluster(30, 'p_iris_setosa'). 
+value(31,'sepal_length',54). value(31,'sepal_width',34). value(31,'petal_length',15). value(31,'petal_width',4). class(31, 'c_iris_setosa'). cluster(31, 'p_iris_setosa'). 
+value(32,'sepal_length',52). value(32,'sepal_width',41). value(32,'petal_length',15). value(32,'petal_width',1). class(32, 'c_iris_setosa'). cluster(32, 'p_iris_setosa'). 
+value(33,'sepal_length',55). value(33,'sepal_width',42). value(33,'petal_length',14). value(33,'petal_width',2). class(33, 'c_iris_setosa'). cluster(33, 'p_iris_setosa'). 
+value(34,'sepal_length',49). value(34,'sepal_width',31). value(34,'petal_length',15). value(34,'petal_width',1). class(34, 'c_iris_setosa'). cluster(34, 'p_iris_setosa'). 
+value(35,'sepal_length',50). value(35,'sepal_width',32). value(35,'petal_length',12). value(35,'petal_width',2). class(35, 'c_iris_setosa'). cluster(35, 'p_iris_setosa'). 
+value(36,'sepal_length',55). value(36,'sepal_width',35). value(36,'petal_length',13). value(36,'petal_width',2). class(36, 'c_iris_setosa'). cluster(36, 'p_iris_setosa'). 
+value(37,'sepal_length',49). value(37,'sepal_width',31). value(37,'petal_length',15). value(37,'petal_width',1). class(37, 'c_iris_setosa'). cluster(37, 'p_iris_setosa'). 
+value(38,'sepal_length',44). value(38,'sepal_width',30). value(38,'petal_length',13). value(38,'petal_width',2). class(38, 'c_iris_setosa'). cluster(38, 'p_iris_setosa'). 
+value(39,'sepal_length',51). value(39,'sepal_width',34). value(39,'petal_length',15). value(39,'petal_width',2). class(39, 'c_iris_setosa'). cluster(39, 'p_iris_setosa'). 
+value(40,'sepal_length',50). value(40,'sepal_width',35). value(40,'petal_length',13). value(40,'petal_width',3). class(40, 'c_iris_setosa'). cluster(40, 'p_iris_setosa'). 
+value(41,'sepal_length',45). value(41,'sepal_width',23). value(41,'petal_length',13). value(41,'petal_width',3). class(41, 'c_iris_setosa'). cluster(41, 'p_iris_setosa'). 
+value(42,'sepal_length',44). value(42,'sepal_width',32). value(42,'petal_length',13). value(42,'petal_width',2). class(42, 'c_iris_setosa'). cluster(42, 'p_iris_setosa'). 
+value(43,'sepal_length',50). value(43,'sepal_width',35). value(43,'petal_length',16). value(43,'petal_width',6). class(43, 'c_iris_setosa'). cluster(43, 'p_iris_setosa'). 
+value(44,'sepal_length',51). value(44,'sepal_width',38). value(44,'petal_length',19). value(44,'petal_width',4). class(44, 'c_iris_setosa'). cluster(44, 'p_iris_setosa'). 
+value(45,'sepal_length',48). value(45,'sepal_width',30). value(45,'petal_length',14). value(45,'petal_width',3). class(45, 'c_iris_setosa'). cluster(45, 'p_iris_setosa'). 
+value(46,'sepal_length',51). value(46,'sepal_width',38). value(46,'petal_length',16). value(46,'petal_width',2). class(46, 'c_iris_setosa'). cluster(46, 'p_iris_setosa'). 
+value(47,'sepal_length',46). value(47,'sepal_width',32). value(47,'petal_length',14). value(47,'petal_width',2). class(47, 'c_iris_setosa'). cluster(47, 'p_iris_setosa'). 
+value(48,'sepal_length',53). value(48,'sepal_width',37). value(48,'petal_length',15). value(48,'petal_width',2). class(48, 'c_iris_setosa'). cluster(48, 'p_iris_setosa'). 
+value(49,'sepal_length',50). value(49,'sepal_width',33). value(49,'petal_length',14). value(49,'petal_width',2). class(49, 'c_iris_setosa'). cluster(49, 'p_iris_setosa'). 
+value(50,'sepal_length',70). value(50,'sepal_width',32). value(50,'petal_length',47). value(50,'petal_width',14). class(50, 'c_iris_versicolor'). cluster(50, 'p_iris_versicolor'). 
+value(51,'sepal_length',64). value(51,'sepal_width',32). value(51,'petal_length',45). value(51,'petal_width',15). class(51, 'c_iris_versicolor'). cluster(51, 'p_iris_versicolor'). 
+value(52,'sepal_length',69). value(52,'sepal_width',31). value(52,'petal_length',49). value(52,'petal_width',15). class(52, 'c_iris_versicolor'). cluster(52, 'p_iris_versicolor'). 
+value(53,'sepal_length',55). value(53,'sepal_width',23). value(53,'petal_length',40). value(53,'petal_width',13). class(53, 'c_iris_versicolor'). cluster(53, 'p_iris_versicolor'). 
+value(54,'sepal_length',65). value(54,'sepal_width',28). value(54,'petal_length',46). value(54,'petal_width',15). class(54, 'c_iris_versicolor'). cluster(54, 'p_iris_versicolor'). 
+value(55,'sepal_length',57). value(55,'sepal_width',28). value(55,'petal_length',45). value(55,'petal_width',13). class(55, 'c_iris_versicolor'). cluster(55, 'p_iris_versicolor'). 
+value(56,'sepal_length',63). value(56,'sepal_width',33). value(56,'petal_length',47). value(56,'petal_width',16). class(56, 'c_iris_versicolor'). cluster(56, 'p_iris_versicolor'). 
+value(57,'sepal_length',49). value(57,'sepal_width',24). value(57,'petal_length',33). value(57,'petal_width',10). class(57, 'c_iris_versicolor'). cluster(57, 'p_iris_versicolor'). 
+value(58,'sepal_length',66). value(58,'sepal_width',29). value(58,'petal_length',46). value(58,'petal_width',13). class(58, 'c_iris_versicolor'). cluster(58, 'p_iris_versicolor'). 
+value(59,'sepal_length',52). value(59,'sepal_width',27). value(59,'petal_length',39). value(59,'petal_width',14). class(59, 'c_iris_versicolor'). cluster(59, 'p_iris_versicolor'). 
+value(60,'sepal_length',50). value(60,'sepal_width',20). value(60,'petal_length',35). value(60,'petal_width',10). class(60, 'c_iris_versicolor'). cluster(60, 'p_iris_versicolor'). 
+value(61,'sepal_length',59). value(61,'sepal_width',30). value(61,'petal_length',42). value(61,'petal_width',15). class(61, 'c_iris_versicolor'). cluster(61, 'p_iris_versicolor'). 
+value(62,'sepal_length',60). value(62,'sepal_width',22). value(62,'petal_length',40). value(62,'petal_width',10). class(62, 'c_iris_versicolor'). cluster(62, 'p_iris_versicolor'). 
+value(63,'sepal_length',61). value(63,'sepal_width',29). value(63,'petal_length',47). value(63,'petal_width',14). class(63, 'c_iris_versicolor'). cluster(63, 'p_iris_versicolor'). 
+value(64,'sepal_length',56). value(64,'sepal_width',29). value(64,'petal_length',36). value(64,'petal_width',13). class(64, 'c_iris_versicolor'). cluster(64, 'p_iris_versicolor'). 
+value(65,'sepal_length',67). value(65,'sepal_width',31). value(65,'petal_length',44). value(65,'petal_width',14). class(65, 'c_iris_versicolor'). cluster(65, 'p_iris_versicolor'). 
+value(66,'sepal_length',56). value(66,'sepal_width',30). value(66,'petal_length',45). value(66,'petal_width',15). class(66, 'c_iris_versicolor'). cluster(66, 'p_iris_versicolor'). 
+value(67,'sepal_length',58). value(67,'sepal_width',27). value(67,'petal_length',41). value(67,'petal_width',10). class(67, 'c_iris_versicolor'). cluster(67, 'p_iris_versicolor'). 
+value(68,'sepal_length',62). value(68,'sepal_width',22). value(68,'petal_length',45). value(68,'petal_width',15). class(68, 'c_iris_versicolor'). cluster(68, 'p_iris_versicolor'). 
+value(69,'sepal_length',56). value(69,'sepal_width',25). value(69,'petal_length',39). value(69,'petal_width',11). class(69, 'c_iris_versicolor'). cluster(69, 'p_iris_versicolor'). 
+value(70,'sepal_length',59). value(70,'sepal_width',32). value(70,'petal_length',48). value(70,'petal_width',18). class(70, 'c_iris_versicolor'). cluster(70, 'p_iris_versicolor'). 
+value(71,'sepal_length',61). value(71,'sepal_width',28). value(71,'petal_length',40). value(71,'petal_width',13). class(71, 'c_iris_versicolor'). cluster(71, 'p_iris_versicolor'). 
+value(72,'sepal_length',63). value(72,'sepal_width',25). value(72,'petal_length',49). value(72,'petal_width',15). class(72, 'c_iris_versicolor'). cluster(72, 'p_iris_versicolor'). 
+value(73,'sepal_length',61). value(73,'sepal_width',28). value(73,'petal_length',47). value(73,'petal_width',12). class(73, 'c_iris_versicolor'). cluster(73, 'p_iris_versicolor'). 
+value(74,'sepal_length',64). value(74,'sepal_width',29). value(74,'petal_length',43). value(74,'petal_width',13). class(74, 'c_iris_versicolor'). cluster(74, 'p_iris_versicolor'). 
+value(75,'sepal_length',66). value(75,'sepal_width',30). value(75,'petal_length',44). value(75,'petal_width',14). class(75, 'c_iris_versicolor'). cluster(75, 'p_iris_versicolor'). 
+value(76,'sepal_length',68). value(76,'sepal_width',28). value(76,'petal_length',48). value(76,'petal_width',14). class(76, 'c_iris_versicolor'). cluster(76, 'p_iris_versicolor'). 
+value(77,'sepal_length',67). value(77,'sepal_width',30). value(77,'petal_length',50). value(77,'petal_width',17). class(77, 'c_iris_versicolor'). cluster(77, 'p_iris_versicolor'). 
+value(78,'sepal_length',60). value(78,'sepal_width',29). value(78,'petal_length',45). value(78,'petal_width',15). class(78, 'c_iris_versicolor'). cluster(78, 'p_iris_versicolor'). 
+value(79,'sepal_length',57). value(79,'sepal_width',26). value(79,'petal_length',35). value(79,'petal_width',10). class(79, 'c_iris_versicolor'). cluster(79, 'p_iris_versicolor'). 
+value(80,'sepal_length',55). value(80,'sepal_width',24). value(80,'petal_length',38). value(80,'petal_width',11). class(80, 'c_iris_versicolor'). cluster(80, 'p_iris_versicolor'). 
+value(81,'sepal_length',55). value(81,'sepal_width',24). value(81,'petal_length',37). value(81,'petal_width',10). class(81, 'c_iris_versicolor'). cluster(81, 'p_iris_versicolor'). 
+value(82,'sepal_length',58). value(82,'sepal_width',27). value(82,'petal_length',39). value(82,'petal_width',12). class(82, 'c_iris_versicolor'). cluster(82, 'p_iris_versicolor'). 
+value(83,'sepal_length',60). value(83,'sepal_width',27). value(83,'petal_length',51). value(83,'petal_width',16). class(83, 'c_iris_versicolor'). cluster(83, 'p_iris_versicolor'). 
+value(84,'sepal_length',54). value(84,'sepal_width',30). value(84,'petal_length',45). value(84,'petal_width',15). class(84, 'c_iris_versicolor'). cluster(84, 'p_iris_versicolor'). 
+value(85,'sepal_length',60). value(85,'sepal_width',34). value(85,'petal_length',45). value(85,'petal_width',16). class(85, 'c_iris_versicolor'). cluster(85, 'p_iris_versicolor'). 
+value(86,'sepal_length',67). value(86,'sepal_width',31). value(86,'petal_length',47). value(86,'petal_width',15). class(86, 'c_iris_versicolor'). cluster(86, 'p_iris_versicolor'). 
+value(87,'sepal_length',63). value(87,'sepal_width',23). value(87,'petal_length',44). value(87,'petal_width',13). class(87, 'c_iris_versicolor'). cluster(87, 'p_iris_versicolor'). 
+value(88,'sepal_length',56). value(88,'sepal_width',30). value(88,'petal_length',41). value(88,'petal_width',13). class(88, 'c_iris_versicolor'). cluster(88, 'p_iris_versicolor'). 
+value(89,'sepal_length',55). value(89,'sepal_width',25). value(89,'petal_length',40). value(89,'petal_width',13). class(89, 'c_iris_versicolor'). cluster(89, 'p_iris_versicolor'). 
+value(90,'sepal_length',55). value(90,'sepal_width',26). value(90,'petal_length',44). value(90,'petal_width',12). class(90, 'c_iris_versicolor'). cluster(90, 'p_iris_versicolor'). 
+value(91,'sepal_length',61). value(91,'sepal_width',30). value(91,'petal_length',46). value(91,'petal_width',14). class(91, 'c_iris_versicolor'). cluster(91, 'p_iris_versicolor'). 
+value(92,'sepal_length',58). value(92,'sepal_width',26). value(92,'petal_length',40). value(92,'petal_width',12). class(92, 'c_iris_versicolor'). cluster(92, 'p_iris_versicolor'). 
+value(93,'sepal_length',50). value(93,'sepal_width',23). value(93,'petal_length',33). value(93,'petal_width',10). class(93, 'c_iris_versicolor'). cluster(93, 'p_iris_versicolor'). 
+value(94,'sepal_length',56). value(94,'sepal_width',27). value(94,'petal_length',42). value(94,'petal_width',13). class(94, 'c_iris_versicolor'). cluster(94, 'p_iris_versicolor'). 
+value(95,'sepal_length',57). value(95,'sepal_width',30). value(95,'petal_length',42). value(95,'petal_width',12). class(95, 'c_iris_versicolor'). cluster(95, 'p_iris_versicolor'). 
+value(96,'sepal_length',57). value(96,'sepal_width',29). value(96,'petal_length',42). value(96,'petal_width',13). class(96, 'c_iris_versicolor'). cluster(96, 'p_iris_versicolor'). 
+value(97,'sepal_length',62). value(97,'sepal_width',29). value(97,'petal_length',43). value(97,'petal_width',13). class(97, 'c_iris_versicolor'). cluster(97, 'p_iris_versicolor'). 
+value(98,'sepal_length',51). value(98,'sepal_width',25). value(98,'petal_length',30). value(98,'petal_width',11). class(98, 'c_iris_versicolor'). cluster(98, 'p_iris_versicolor'). 
+value(99,'sepal_length',57). value(99,'sepal_width',28). value(99,'petal_length',41). value(99,'petal_width',13). class(99, 'c_iris_versicolor'). cluster(99, 'p_iris_versicolor'). 
+value(100,'sepal_length',63). value(100,'sepal_width',33). value(100,'petal_length',60). value(100,'petal_width',25). class(100, 'c_iris_virginica'). cluster(100, 'p_iris_virginica'). 
+value(101,'sepal_length',58). value(101,'sepal_width',27). value(101,'petal_length',51). value(101,'petal_width',19). class(101, 'c_iris_virginica'). cluster(101, 'p_iris_virginica'). 
+value(102,'sepal_length',71). value(102,'sepal_width',30). value(102,'petal_length',59). value(102,'petal_width',21). class(102, 'c_iris_virginica'). cluster(102, 'p_iris_virginica'). 
+value(103,'sepal_length',63). value(103,'sepal_width',29). value(103,'petal_length',56). value(103,'petal_width',18). class(103, 'c_iris_virginica'). cluster(103, 'p_iris_virginica'). 
+value(104,'sepal_length',65). value(104,'sepal_width',30). value(104,'petal_length',58). value(104,'petal_width',22). class(104, 'c_iris_virginica'). cluster(104, 'p_iris_virginica'). 
+value(105,'sepal_length',76). value(105,'sepal_width',30). value(105,'petal_length',66). value(105,'petal_width',21). class(105, 'c_iris_virginica'). cluster(105, 'p_iris_virginica'). 
+value(106,'sepal_length',49). value(106,'sepal_width',25). value(106,'petal_length',45). value(106,'petal_width',17). class(106, 'c_iris_virginica'). cluster(106, 'p_iris_virginica'). 
+value(107,'sepal_length',73). value(107,'sepal_width',29). value(107,'petal_length',63). value(107,'petal_width',18). class(107, 'c_iris_virginica'). cluster(107, 'p_iris_virginica'). 
+value(108,'sepal_length',67). value(108,'sepal_width',25). value(108,'petal_length',58). value(108,'petal_width',18). class(108, 'c_iris_virginica'). cluster(108, 'p_iris_virginica'). 
+value(109,'sepal_length',72). value(109,'sepal_width',36). value(109,'petal_length',61). value(109,'petal_width',25). class(109, 'c_iris_virginica'). cluster(109, 'p_iris_virginica'). 
+value(110,'sepal_length',65). value(110,'sepal_width',32). value(110,'petal_length',51). value(110,'petal_width',20). class(110, 'c_iris_virginica'). cluster(110, 'p_iris_virginica'). 
+value(111,'sepal_length',64). value(111,'sepal_width',27). value(111,'petal_length',53). value(111,'petal_width',19). class(111, 'c_iris_virginica'). cluster(111, 'p_iris_virginica'). 
+value(112,'sepal_length',68). value(112,'sepal_width',30). value(112,'petal_length',55). value(112,'petal_width',21). class(112, 'c_iris_virginica'). cluster(112, 'p_iris_virginica'). 
+value(113,'sepal_length',57). value(113,'sepal_width',25). value(113,'petal_length',50). value(113,'petal_width',20). class(113, 'c_iris_virginica'). cluster(113, 'p_iris_virginica'). 
+value(114,'sepal_length',58). value(114,'sepal_width',28). value(114,'petal_length',51). value(114,'petal_width',24). class(114, 'c_iris_virginica'). cluster(114, 'p_iris_virginica'). 
+value(115,'sepal_length',64). value(115,'sepal_width',32). value(115,'petal_length',53). value(115,'petal_width',23). class(115, 'c_iris_virginica'). cluster(115, 'p_iris_virginica'). 
+value(116,'sepal_length',65). value(116,'sepal_width',30). value(116,'petal_length',55). value(116,'petal_width',18). class(116, 'c_iris_virginica'). cluster(116, 'p_iris_virginica'). 
+value(117,'sepal_length',77). value(117,'sepal_width',38). value(117,'petal_length',67). value(117,'petal_width',22). class(117, 'c_iris_virginica'). cluster(117, 'p_iris_virginica'). 
+value(118,'sepal_length',77). value(118,'sepal_width',26). value(118,'petal_length',69). value(118,'petal_width',23). class(118, 'c_iris_virginica'). cluster(118, 'p_iris_virginica'). 
+value(119,'sepal_length',60). value(119,'sepal_width',22). value(119,'petal_length',50). value(119,'petal_width',15). class(119, 'c_iris_virginica'). cluster(119, 'p_iris_virginica'). 
+value(120,'sepal_length',69). value(120,'sepal_width',32). value(120,'petal_length',57). value(120,'petal_width',23). class(120, 'c_iris_virginica'). cluster(120, 'p_iris_virginica'). 
+value(121,'sepal_length',56). value(121,'sepal_width',28). value(121,'petal_length',49). value(121,'petal_width',20). class(121, 'c_iris_virginica'). cluster(121, 'p_iris_virginica'). 
+value(122,'sepal_length',77). value(122,'sepal_width',28). value(122,'petal_length',67). value(122,'petal_width',20). class(122, 'c_iris_virginica'). cluster(122, 'p_iris_virginica'). 
+value(123,'sepal_length',63). value(123,'sepal_width',27). value(123,'petal_length',49). value(123,'petal_width',18). class(123, 'c_iris_virginica'). cluster(123, 'p_iris_virginica'). 
+value(124,'sepal_length',67). value(124,'sepal_width',33). value(124,'petal_length',57). value(124,'petal_width',21). class(124, 'c_iris_virginica'). cluster(124, 'p_iris_virginica'). 
+value(125,'sepal_length',72). value(125,'sepal_width',32). value(125,'petal_length',60). value(125,'petal_width',18). class(125, 'c_iris_virginica'). cluster(125, 'p_iris_virginica'). 
+value(126,'sepal_length',62). value(126,'sepal_width',28). value(126,'petal_length',48). value(126,'petal_width',18). class(126, 'c_iris_virginica'). cluster(126, 'p_iris_virginica'). 
+value(127,'sepal_length',61). value(127,'sepal_width',30). value(127,'petal_length',49). value(127,'petal_width',18). class(127, 'c_iris_virginica'). cluster(127, 'p_iris_virginica'). 
+value(128,'sepal_length',64). value(128,'sepal_width',28). value(128,'petal_length',56). value(128,'petal_width',21). class(128, 'c_iris_virginica'). cluster(128, 'p_iris_virginica'). 
+value(129,'sepal_length',72). value(129,'sepal_width',30). value(129,'petal_length',58). value(129,'petal_width',16). class(129, 'c_iris_virginica'). cluster(129, 'p_iris_virginica'). 
+value(130,'sepal_length',74). value(130,'sepal_width',28). value(130,'petal_length',61). value(130,'petal_width',19). class(130, 'c_iris_virginica'). cluster(130, 'p_iris_virginica'). 
+value(131,'sepal_length',79). value(131,'sepal_width',38). value(131,'petal_length',64). value(131,'petal_width',20). class(131, 'c_iris_virginica'). cluster(131, 'p_iris_virginica'). 
+value(132,'sepal_length',64). value(132,'sepal_width',28). value(132,'petal_length',56). value(132,'petal_width',22). class(132, 'c_iris_virginica'). cluster(132, 'p_iris_virginica'). 
+value(133,'sepal_length',63). value(133,'sepal_width',28). value(133,'petal_length',51). value(133,'petal_width',15). class(133, 'c_iris_virginica'). cluster(133, 'p_iris_virginica'). 
+value(134,'sepal_length',61). value(134,'sepal_width',26). value(134,'petal_length',56). value(134,'petal_width',14). class(134, 'c_iris_virginica'). cluster(134, 'p_iris_virginica'). 
+value(135,'sepal_length',77). value(135,'sepal_width',30). value(135,'petal_length',61). value(135,'petal_width',23). class(135, 'c_iris_virginica'). cluster(135, 'p_iris_virginica'). 
+value(136,'sepal_length',63). value(136,'sepal_width',34). value(136,'petal_length',56). value(136,'petal_width',24). class(136, 'c_iris_virginica'). cluster(136, 'p_iris_virginica'). 
+value(137,'sepal_length',64). value(137,'sepal_width',31). value(137,'petal_length',55). value(137,'petal_width',18). class(137, 'c_iris_virginica'). cluster(137, 'p_iris_virginica'). 
+value(138,'sepal_length',60). value(138,'sepal_width',30). value(138,'petal_length',48). value(138,'petal_width',18). class(138, 'c_iris_virginica'). cluster(138, 'p_iris_virginica'). 
+value(139,'sepal_length',69). value(139,'sepal_width',31). value(139,'petal_length',54). value(139,'petal_width',21). class(139, 'c_iris_virginica'). cluster(139, 'p_iris_virginica'). 
+value(140,'sepal_length',67). value(140,'sepal_width',31). value(140,'petal_length',56). value(140,'petal_width',24). class(140, 'c_iris_virginica'). cluster(140, 'p_iris_virginica'). 
+value(141,'sepal_length',69). value(141,'sepal_width',31). value(141,'petal_length',51). value(141,'petal_width',23). class(141, 'c_iris_virginica'). cluster(141, 'p_iris_virginica'). 
+value(142,'sepal_length',58). value(142,'sepal_width',27). value(142,'petal_length',51). value(142,'petal_width',19). class(142, 'c_iris_virginica'). cluster(142, 'p_iris_virginica'). 
+value(143,'sepal_length',68). value(143,'sepal_width',32). value(143,'petal_length',59). value(143,'petal_width',23). class(143, 'c_iris_virginica'). cluster(143, 'p_iris_virginica'). 
+value(144,'sepal_length',67). value(144,'sepal_width',33). value(144,'petal_length',57). value(144,'petal_width',25). class(144, 'c_iris_virginica'). cluster(144, 'p_iris_virginica'). 
+value(145,'sepal_length',67). value(145,'sepal_width',30). value(145,'petal_length',52). value(145,'petal_width',23). class(145, 'c_iris_virginica'). cluster(145, 'p_iris_virginica'). 
+value(146,'sepal_length',63). value(146,'sepal_width',25). value(146,'petal_length',50). value(146,'petal_width',19). class(146, 'c_iris_virginica'). cluster(146, 'p_iris_virginica'). 
+value(147,'sepal_length',65). value(147,'sepal_width',30). value(147,'petal_length',52). value(147,'petal_width',20). class(147, 'c_iris_virginica'). cluster(147, 'p_iris_virginica'). 
+value(148,'sepal_length',62). value(148,'sepal_width',34). value(148,'petal_length',54). value(148,'petal_width',23). class(148, 'c_iris_virginica'). cluster(148, 'p_iris_virginica'). 
+value(149,'sepal_length',59). value(149,'sepal_width',30). value(149,'petal_length',51). value(149,'petal_width',18). class(149, 'c_iris_virginica'). cluster(149, 'p_iris_virginica'). 
+
+_end.
+% MIT License
+% 
+% Copyright (c) 2018 Javier Romero
+% 
+% Permission is hereby granted, free of charge, to any person obtaining a copy
+% of this software and associated documentation files (the "Software"), to deal
+% in the Software without restriction, including without limitation the rights
+% to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+% copies of the Software, and to permit persons to whom the Software is
+% furnished to do so, subject to the following conditions:
+% 
+% The above copyright notice and this permission notice shall be included in all
+% copies or substantial portions of the Software.
+% 
+% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+% IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+% FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+% AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+% LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+% OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+% SOFTWARE.
+% -*- coding: utf-8 -*-
+
+_end.
+#program generate.
+
+#program specification.
+_preference(overlap,less(cardinality)).
+_preference(overlap,(1,1,(I,R2,R1)),1,for(atom(overlappoint(I,R1,R2))),()) :- rectangle(R1), rectangle(R2), pointid(I).
+_holds(atom(overlappoint(I,R1,R2)),0) :- overlappoint(I,R1,R2), rectangle(R1), rectangle(R2), pointid(I).
+
+_preference(impurity,less(cardinality)).
+_preference(impurity,(2,1,(I)),1,for(atom(impurepoint(I))),()) :- pointid(I).
+_holds(atom(impurepoint(I)),0) :- impurepoint(I), pointid(I).
+
+_preference(outlier,less(cardinality)).
+_preference(outlier,(3,1,(I)),1,for(atom(outlier(I))),()) :- pointid(I).
+_holds(atom(outlier(I)),0) :- outlier(I), pointid(I).
+
+_preference(all,lexico).
+_preference(all,(4,1,()),1,name(overlap),(overlapprio)).
+_preference(all,(4,2,()),1,name(impurity),(impurityprio)).
+_preference(all,(4,3,()),1,name(outlier),(outlierprio)).
+
+_optimize(all).
+
+
+
+_true.
+
+
+_pref_dom(X) :- _preference(X,_).
+
+
+#program preference(_m1,_m2).
+_unsat(_m(_m1),_m(_m2)) :- not __better(P,_m(_m1),_m(_m2)); _optimize(P); _volatile(_m(_m1),_m(_m2)).
+#program preference_base.
+__required(P,better) :- _optimize(P).
+#defined _optimize/1.
+#defined __better/3.
+#defined __required/2.
+#defined __error/1.
+#defined __error_type/2.
+__error(("preference:",P,": error: preference specification error, type '",T,"' does not allow formulas.")) :- _preference(P,T); __error_type(T,no_formulas); _preference(P,_,_,for(X),_).
+__error(("preference:",P,": error: preference specification error, type '",T,"' requires weight tuples.")) :- _preference(P,T); __error_type(T,yes_weights); _preference(P,_,_,_,W); W=().
+__error(("preference:",P,": error: preference specification error, type '",T,"' does not allow weights.")) :- _preference(P,T); __error_type(T,no_weights); _preference(P,_,_,_,W); W!=().
+__error(("preference:",P,": error: preference specification error, type '",T,"' does not allow using '>>'.")) :- _preference(P,T); __error_type(T,no_ordering); _preference(P,_,R,_,_); R>1.
+__error(("preference:",P,": error: preference specification error, type '",T,"' requires at least ",(N-1),"'>>'s.")) :- _preference(P,T); __error_type(T,ordering_min_length(N)); N>1; not _preference(P,_,N,_,_).
+__error(("preference:",P,": error: preference specification error, type '",T,"' allows at most ",(N-1),"'>>'s.")) :- _preference(P,T); __error_type(T,ordering_max_length(N)); _preference(P,_,R,_,_); R>N.
+__error(("preference:",P,": error: preference specification error, type '",T,"' does not allow sets.")) :- _preference(P,T); __error_type(T,no_sets); _preference(P,E,S,X,_); _preference(P,E,S,Y,_); X>Y.
+__error(("preference:",P,": error: preference specification error, type '",T,"' does not allow sets at position",S,".")) :- _preference(P,T); __error_type(T,no_sets(S)); _preference(P,E,S,X,_); _preference(P,E,S,Y,_); X>Y.
+__error(("preference:",P,": error: preference specification error, type '",T,"' does not allow naming atoms.")) :- _preference(P,T); __error_type(T,no_naming); _preference(P,_,_,name(X),_).
+__error(("preference:",P,": error: preference specification error, type '",T,"' does not allow more than one preference element.")) :- _preference(P,T); __error_type(T,single); 2 <= { _preference(P,_,_,_,_) :  }.
+__error(("preference:",P,": error: preference specification error, type '",T,"' does not allow using '||'.")) :- _preference(P,T); __error_type(T,no_condition); _preference(P,_,0,_,_).
+__error(("preference:",P,": error: preference specification error, type '",T,"' requires a weight tuple of at least ",N," elements.")) :- _preference(P,T); __error_type(T,(min_weight_length,N)); _preference(P,_,_,_,W); @length(W)<N.
+__error(("preference:",P,": error: preference specification error, type '",T,"' requires a weight tuple of at most ",N," elements.")) :- _preference(P,T); __error_type(T,(max_weight_length,N)); _preference(P,_,_,_,W); @length(W)>N.
+__error(("preference:",P,": error: preference specification error, type '",T,"' requires different weights for every named preference statement")) :- _preference(P,T); __error_type(T,naming_unique_weights); _preference(P,_,_,name(P1),W); _preference(P,_,_,name(P2),W); P1!=P2.
+#program preference(_m1,_m2).
+__better(P,_m(_m1),_m(_m2)) :- _preference(P,less(cardinality)); __required(P,better); 1 <= #sum { -1,X : _holds(X,_m1), _preference(P,_,_,for(X),_), _volatile(_m(_m1),_m(_m2)); 1,X : _holds(X,_m2), _preference(P,_,_,for(X),_), _volatile(_m(_m1),_m(_m2)) }; _volatile(_m(_m1),_m(_m2)).
+__bettereq(P,_m(_m1),_m(_m2)) :- _preference(P,less(cardinality)); __required(P,bettereq); 0 <= #sum { -1,X : _holds(X,_m1), _preference(P,_,_,for(X),_), _volatile(_m(_m1),_m(_m2)); 1,X : _holds(X,_m2), _preference(P,_,_,for(X),_), _volatile(_m(_m1),_m(_m2)) }; _volatile(_m(_m1),_m(_m2)).
+__eq(P,_m(_m1),_m(_m2)) :- _preference(P,less(cardinality)); __required(P,eq); 0 <= #sum { -1,X : _holds(X,_m1), _preference(P,_,_,for(X),_), _volatile(_m(_m1),_m(_m2)); 1,X : _holds(X,_m2), _preference(P,_,_,for(X),_), _volatile(_m(_m1),_m(_m2)) } <= 0; _volatile(_m(_m1),_m(_m2)).
+__worseeq(P,_m(_m1),_m(_m2)) :- _preference(P,less(cardinality)); __required(P,worseeq); 0 >= #sum { -1,X : _holds(X,_m1), _preference(P,_,_,for(X),_), _volatile(_m(_m1),_m(_m2)); 1,X : _holds(X,_m2), _preference(P,_,_,for(X),_), _volatile(_m(_m1),_m(_m2)) }; _volatile(_m(_m1),_m(_m2)).
+__worse(P,_m(_m1),_m(_m2)) :- _preference(P,less(cardinality)); __required(P,worse); -1 >= #sum { -1,X : _holds(X,_m1), _preference(P,_,_,for(X),_), _volatile(_m(_m1),_m(_m2)); 1,X : _holds(X,_m2), _preference(P,_,_,for(X),_), _volatile(_m(_m1),_m(_m2)) }; _volatile(_m(_m1),_m(_m2)).
+#program preference_base.
+__error_type(less(cardinality),no_naming).
+__error_type(less(cardinality),no_ordering).
+__error_type(less(cardinality),no_condition).
+__error_type(less(cardinality),no_weights).
+__error_type(less(cardinality),no_sets).
+__many(P) :- _preference(P,lexico); 2 <= #sum { 1,Q : _preference(P,_,_,name(Q),_) }.
+__required(Q,better) :- _preference(P,lexico); __required(P,better); _preference(P,_,_,name(Q),_).
+__required(Q,eq) :- _preference(P,lexico); __required(P,better); _preference(P,_,_,name(Q),_); __many(P).
+#program preference(_m1,_m2).
+__better(P,_m(_m1),_m(_m2)) :- _preference(P,lexico); __required(P,better); __better(R,_m(_m1),_m(_m2)); _preference(P,_,_,name(R),L); __eq(Q,_m(_m1),_m(_m2)) : _preference(P,_,_,name(Q),LL), LL>L, __many(P); _volatile(_m(_m1),_m(_m2)).
+#program preference_base.
+__required(P,better) :- _preference(P,lexico); __required(P,bettereq).
+__required(P,eq) :- _preference(P,lexico); __required(P,bettereq).
+#program preference(_m1,_m2).
+__bettereq(P,_m(_m1),_m(_m2)) :- _preference(P,lexico); __required(P,bettereq); 1 <= #sum { 1 : __better(P,_m(_m1),_m(_m2)), _volatile(_m(_m1),_m(_m2)); 1 : __eq(P,_m(_m1),_m(_m2)), _volatile(_m(_m1),_m(_m2)) }; _volatile(_m(_m1),_m(_m2)).
+#program preference_base.
+__required(Q,eq) :- _preference(P,lexico); __required(P,eq); _preference(P,_,_,name(Q),_).
+#program preference(_m1,_m2).
+__eq(P,_m(_m1),_m(_m2)) :- _preference(P,lexico); __required(P,eq); __eq(Q,_m(_m1),_m(_m2)) : _preference(P,_,_,name(Q),_); _volatile(_m(_m1),_m(_m2)).
+#program preference_base.
+__required(P,worse) :- _preference(P,lexico); __required(P,worseeq).
+__required(P,eq) :- _preference(P,lexico); __required(P,worseeq).
+#program preference(_m1,_m2).
+__worseeq(P,_m(_m1),_m(_m2)) :- _preference(P,lexico); __required(P,worseeq); 1 <= #sum { 1 : __worse(P,_m(_m1),_m(_m2)), _volatile(_m(_m1),_m(_m2)); 1 : __eq(P,_m(_m1),_m(_m2)), _volatile(_m(_m1),_m(_m2)) }; _volatile(_m(_m1),_m(_m2)).
+#program preference_base.
+__required(Q,worse) :- _preference(P,lexico); __required(P,worse); _preference(P,_,_,name(Q),_).
+__required(Q,eq) :- _preference(P,lexico); __required(P,worse); _preference(P,_,_,name(Q),_); __many(P).
+#program preference(_m1,_m2).
+__worse(P,_m(_m1),_m(_m2)) :- _preference(P,lexico); __required(P,worse); __worse(R,_m(_m1),_m(_m2)); _preference(P,_,_,name(R),L); __eq(Q,_m(_m1),_m(_m2)) : _preference(P,_,_,name(Q),LL), LL>L, __many(P); _volatile(_m(_m1),_m(_m2)).
+#program preference_base.
+__required(P,bettereq) :- _preference(P,lexico); __required(P,unc).
+__required(P,worseeq) :- _preference(P,lexico); __required(P,unc).
+#program preference(_m1,_m2).
+__unc(P,_m(_m1),_m(_m2)) :- _preference(P,lexico); __required(P,unc); not __bettereq(P,_m(_m1),_m(_m2)); not __worseeq(P,_m(_m1),_m(_m2)); _volatile(_m(_m1),_m(_m2)).
+#program preference_base.
+__error_type(lexico,no_formulas).
+__error_type(lexico,no_ordering).
+__error_type(lexico,no_condition).
+__error_type(lexico,no_sets).
+__error_type(lexico,(min_weight_length,1)).
+__error_type(lexico,(max_weight_length,1)).
+__error_type(lexico,naming_unique_weights).
+#program weak.
+:~ ___wc(P,W,L,T,X); _optimize(P); _holds(X,0). [W@L,T]
+#defined ___wc/5.
+___bit(P,G,B) :- ___as_minmax(P); ___elem(P,G,_,_,_); S = #sum { W,T : ___elem(P,G,W,T,X), W>0; -W,T : ___elem(P,G,W,T,X), W<0 }; B=(0..(@log2up((S+1))-1)).
+{ ___true(bit(P,G,B)) :  } :- ___as_minmax(P); ___bit(P,G,B).
+#false :- ___as_minmax(P); ___elem(P,G,_,_,_); 0 != #sum { -@exp2(B) : ___true(bit(P,G,B)); W,T : ___elem(P,G,W,T,X), W>0, _holds(X,0); -W,T : ___elem(P,G,W,T,X), W<0, not _holds(X,0) }.
+_holds(bit(P,B),0) :- ___as_minmax(P); ___true(bit(P,G,B)); not ___not_max(P,G,B).
+___not_max(P,G,(B-1)) :- ___as_minmax(P); not ___true(bit(P,G,B)); _holds(bit(P,B),0); B>0; ___elem(P,G,_,_,_).
+___not_max(P,G,(B-1)) :- ___as_minmax(P); ___not_max(P,G,B); B>0.
+___wc(P,1,(B+1),0,bit(P,B)) :- ___as_minmax(P); ___bit(P,_,B).
+___levels(P,L) :- ___as_minmax(P); L = #sum { 1,B : ___bit(P,_,B) }.
+#defined ___as_minmax/1.
+#defined ___elem/5.
+#defined ___bit/3.
+___wc(P,W,(L+S),T,X) :- ___as_lexico(P); ___level(P,P1,L1); ___wc(P1,W,L,T,X); S = #sum { LS2,P2,L2 : ___level(P,P2,L2), L2<L1, ___levels(P2,LS2) }.
+___max_level(P,MAX) :- ___as_lexico(P); MAX = #max { L : ___level(P,_,L) }.
+___sum_levels(P,(MIN-1),0) :- ___as_lexico(P); MIN = #min { L : ___level(P,_,L) }.
+___sum_levels(P,(L+1),S) :- ___as_lexico(P); ___sum_levels(P,L,S); ___max_level(P,MAX); L<MAX.
+___sum_levels(P,(L+1),(SS+S)) :- ___as_lexico(P); ___sum_levels(P,L,S); ___level(P,P1,(L+1)); ___levels(P1,SS).
+___levels(P,S) :- ___as_lexico(P); ___max_level(P,MAX); S = #max { SS : ___sum_levels(P,MAX,SS); 0 :  }.
+#defined ___as_lexico/1.
+#defined ___level/3.
+___wc(P,1,1,X,X) :- _preference(P,less(cardinality)); _preference(P,_,_,for(X),_).
+___levels(P,1) :- _preference(P,less(cardinality)).
+___as_lexico(P) :- _preference(P,lexico).
+___level(P,P1,L) :- _preference(P,lexico); _preference(P,_,_,name(P1),L).
