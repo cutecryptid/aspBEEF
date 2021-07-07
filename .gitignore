@@ -2,5 +2,4 @@ tmp/**/**
 htmlReports/*
 asparser/**/**
 input/generated/**
-*.csv
 __pycache__/**/**
