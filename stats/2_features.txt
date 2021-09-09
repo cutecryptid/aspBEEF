@@ -1,0 +1,82 @@
+FREE
+
+Answer: 18
+selattr('sepal_length') selattr('petal_length') rectinliercount('p_2',34) rectinliercount('p_1',50) rectinliercount('p_0',55) rectcluster('p_2','p_2') rectcluster('p_1','p_1') rectcluster('p_0','p_0') minrectval('p_2','sepal_length',61,79) minrectval('p_2','petal_length',52,69) minrectval('p_1','sepal_length',43,58) minrectval('p_1','petal_length',10,19) minrectval('p_0','sepal_length',49,64) minrectval('p_0','petal_length',30,51) outliercount(11) overlapcount(0) impurecount(0)
+OPTIMUM FOUND
+
+Models       : 18+
+  Optimum    : yes
+  Optimal    : 1
+Calls        : 1
+Time         : 37.152s (Solving: 36.40s 1st Model: 0.06s Unsat: 0.00s)
+CPU Time     : 37.151s
+
+Choices      : 89726   
+Conflicts    : 54457    (Analyzed: 54456)
+Restarts     : 194      (Average: 280.70 Last: 283)
+Model-Level  : 42.0    
+Problems     : 2        (Average Length: 1.00 Splits: 0)
+Lemmas       : 54456    (Deleted: 46952)
+  Binary     : 457      (Ratio:   0.84%)
+  Ternary    : 549      (Ratio:   1.01%)
+  Conflict   : 54456    (Average Length:  110.6 Ratio: 100.00%) 
+  Loop       : 0        (Average Length:    0.0 Ratio:   0.00%) 
+  Other      : 0        (Average Length:    0.0 Ratio:   0.00%) 
+Backjumps    : 54456    (Average:  1.61 Max: 100 Sum:  87722)
+  Executed   : 54446    (Average:  1.61 Max: 100 Sum:  87702 Ratio:  99.98%)
+  Bounded    : 10       (Average:  2.00 Max:   2 Sum:     20 Ratio:   0.02%)
+
+Rules        : 266270   (Original: 262794)
+  Choice     : 13      
+  Minimize   : 3       
+Atoms        : 39224   
+Bodies       : 48695    (Original: 48269)
+  Count      : 1735     (Original: 1768)
+Equivalences : 55263    (Atom=Atom: 3352 Body=Body: 1224 Other: 50687)
+Tight        : Yes
+Variables    : 48862    (Eliminated:    0 Frozen: 24333)
+Constraints  : 407491   (Binary:  88.0% Ternary:   6.5% Other:   5.4%)
+
+
+------------------------------
+
+
+FIXED
+
+Answer: 22
+selattr('sepal_width') selattr('petal_length') rectinliercount('p_2',49) rectinliercount('p_1',50) rectinliercount('p_0',34) rectcluster('p_2','p_2') rectcluster('p_1','p_1') rectcluster('p_0','p_0') minrectval('p_2','sepal_width',20,34) minrectval('p_2','petal_length',30,48) minrectval('p_1','sepal_width',23,44) minrectval('p_1','petal_length',10,19) minrectval('p_0','sepal_width',25,38) minrectval('p_0','petal_length',52,69) outliercount(17) overlapcount(0) impurecount(0)
+OPTIMUM FOUND
+
+Models       : 22+
+  Optimum    : yes
+  Optimal    : 1
+Calls        : 1
+Time         : 4.993s (Solving: 4.24s 1st Model: 0.07s Unsat: 0.00s)
+CPU Time     : 4.992s
+
+Choices      : 16569   
+Conflicts    : 8737     (Analyzed: 8736)
+Restarts     : 40       (Average: 218.40 Last: 61)
+Model-Level  : 35.6    
+Problems     : 2        (Average Length: 1.00 Splits: 0)
+Lemmas       : 8736     (Deleted: 6121)
+  Binary     : 160      (Ratio:   1.83%)
+  Ternary    : 106      (Ratio:   1.21%)
+  Conflict   : 8736     (Average Length:   87.3 Ratio: 100.00%) 
+  Loop       : 0        (Average Length:    0.0 Ratio:   0.00%) 
+  Other      : 0        (Average Length:    0.0 Ratio:   0.00%) 
+Backjumps    : 8736     (Average:  1.85 Max: 106 Sum:  16203)
+  Executed   : 8672     (Average:  1.84 Max: 106 Sum:  16076 Ratio:  99.22%)
+  Bounded    : 64       (Average:  1.98 Max:   2 Sum:    127 Ratio:   0.78%)
+
+Rules        : 266666   (Original: 262795)
+  Choice     : 13      
+  Minimize   : 3       
+Atoms        : 39421    (Original: 39223 Auxiliary: 198)
+Bodies       : 49002    (Original: 48249)
+  Count      : 1729     (Original: 1766)
+  Sum        : 0        (Original: 1)
+Equivalences : 75528    (Atom=Atom: 3415 Body=Body: 1367 Other: 70746)
+Tight        : Yes
+Variables    : 43406    (Eliminated:    0 Frozen: 22189)
+Constraints  : 280116   (Binary:  86.5% Ternary:  10.8% Other:   2.7%)

@@ -1,0 +1,168 @@
+asprin version 3.1.0
+Reading from ./asp/rectangles_cluster_adjust.lp ...
+Solving...
+Answer: 1
+selattr('sepal_length') selattr('petal_length') rectinliercount('p_0',1) rectinliercount('p_1',8) rectinliercount('p_2',1) rectcluster('p_0','p_0') rectcluster('p_1','p_1') rectcluster('p_2','p_2') minrectval('p_0','sepal_length',55,55) minrectval('p_0','petal_length',44,44) minrectval('p_1','sepal_length',49,53) minrectval('p_1','petal_length',14,16) minrectval('p_2','sepal_length',73,73) minrectval('p_2','petal_length',63,63) outliercount(50) overlapcount(0) impurecount(0)
+Answer: 2
+selattr('sepal_length') selattr('petal_length') rectinliercount('p_0',2) rectinliercount('p_1',8) rectinliercount('p_2',1) rectcluster('p_0','p_0') rectcluster('p_1','p_1') rectcluster('p_2','p_2') minrectval('p_0','sepal_length',49,52) minrectval('p_0','petal_length',39,45) minrectval('p_1','sepal_length',49,53) minrectval('p_1','petal_length',14,16) minrectval('p_2','sepal_length',69,69) minrectval('p_2','petal_length',57,57) outliercount(49) overlapcount(0) impurecount(0)
+Answer: 3
+selattr('sepal_length') selattr('petal_length') rectinliercount('p_0',2) rectinliercount('p_1',19) rectinliercount('p_2',1) rectcluster('p_0','p_0') rectcluster('p_1','p_1') rectcluster('p_2','p_2') minrectval('p_0','sepal_length',49,52) minrectval('p_0','petal_length',39,45) minrectval('p_1','sepal_length',45,58) minrectval('p_1','petal_length',12,19) minrectval('p_2','sepal_length',69,69) minrectval('p_2','petal_length',57,57) outliercount(38) overlapcount(0) impurecount(0)
+Answer: 4
+selattr('sepal_length') selattr('petal_width') rectinliercount('p_0',16) rectinliercount('p_1',11) rectinliercount('p_2',10) rectcluster('p_0','p_0') rectcluster('p_1','p_1') rectcluster('p_2','p_2') minrectval('p_0','sepal_length',55,67) minrectval('p_0','petal_width',10,16) minrectval('p_1','sepal_length',46,53) minrectval('p_1','petal_width',2,4) minrectval('p_2','sepal_length',65,79) minrectval('p_2','petal_width',18,23) outliercount(23) overlapcount(0) impurecount(0)
+Answer: 5
+selattr('sepal_length') selattr('petal_width') rectinliercount('p_0',16) rectinliercount('p_1',12) rectinliercount('p_2',10) rectcluster('p_0','p_0') rectcluster('p_1','p_1') rectcluster('p_2','p_2') minrectval('p_0','sepal_length',55,67) minrectval('p_0','petal_width',10,16) minrectval('p_1','sepal_length',45,53) minrectval('p_1','petal_width',2,4) minrectval('p_2','sepal_length',65,79) minrectval('p_2','petal_width',18,23) outliercount(22) overlapcount(0) impurecount(0)
+Answer: 6
+selattr('sepal_length') selattr('petal_width') rectinliercount('p_0',16) rectinliercount('p_1',18) rectinliercount('p_2',10) rectcluster('p_0','p_0') rectcluster('p_1','p_1') rectcluster('p_2','p_2') minrectval('p_0','sepal_length',55,67) minrectval('p_0','petal_width',10,16) minrectval('p_1','sepal_length',45,58) minrectval('p_1','petal_width',2,4) minrectval('p_2','sepal_length',65,79) minrectval('p_2','petal_width',18,23) outliercount(16) overlapcount(0) impurecount(0)
+Answer: 7
+selattr('sepal_length') selattr('petal_width') rectinliercount('p_0',16) rectinliercount('p_1',19) rectinliercount('p_2',10) rectcluster('p_0','p_0') rectcluster('p_1','p_1') rectcluster('p_2','p_2') minrectval('p_0','sepal_length',55,67) minrectval('p_0','petal_width',10,16) minrectval('p_1','sepal_length',45,58) minrectval('p_1','petal_width',1,4) minrectval('p_2','sepal_length',65,79) minrectval('p_2','petal_width',18,23) outliercount(15) overlapcount(0) impurecount(0)
+Answer: 8
+selattr('sepal_length') selattr('petal_width') rectinliercount('p_0',20) rectinliercount('p_1',19) rectinliercount('p_2',10) rectcluster('p_0','p_0') rectcluster('p_1','p_1') rectcluster('p_2','p_2') minrectval('p_0','sepal_length',49,70) minrectval('p_0','petal_width',10,17) minrectval('p_1','sepal_length',45,58) minrectval('p_1','petal_width',1,4) minrectval('p_2','sepal_length',65,79) minrectval('p_2','petal_width',18,23) outliercount(11) overlapcount(0) impurecount(0)
+Answer: 9
+selattr('sepal_length') selattr('petal_width') rectinliercount('p_0',21) rectinliercount('p_1',19) rectinliercount('p_2',10) rectcluster('p_0','p_0') rectcluster('p_1','p_1') rectcluster('p_2','p_2') minrectval('p_0','sepal_length',49,63) minrectval('p_0','petal_width',10,19) minrectval('p_1','sepal_length',45,58) minrectval('p_1','petal_width',1,4) minrectval('p_2','sepal_length',65,79) minrectval('p_2','petal_width',18,23) outliercount(10) overlapcount(0) impurecount(0)
+Answer: 10
+selattr('sepal_length') selattr('petal_width') rectinliercount('p_0',22) rectinliercount('p_1',19) rectinliercount('p_2',10) rectcluster('p_0','p_0') rectcluster('p_1','p_1') rectcluster('p_2','p_2') minrectval('p_0','sepal_length',49,63) minrectval('p_0','petal_width',10,20) minrectval('p_1','sepal_length',45,58) minrectval('p_1','petal_width',1,4) minrectval('p_2','sepal_length',65,79) minrectval('p_2','petal_width',18,23) outliercount(9) overlapcount(0) impurecount(0)
+Answer: 11
+selattr('sepal_length') selattr('petal_width') rectinliercount('p_0',21) rectinliercount('p_1',18) rectinliercount('p_2',13) rectcluster('p_0','p_0') rectcluster('p_1','p_1') rectcluster('p_2','p_2') minrectval('p_0','sepal_length',49,63) minrectval('p_0','petal_width',10,19) minrectval('p_1','sepal_length',45,58) minrectval('p_1','petal_width',2,4) minrectval('p_2','sepal_length',64,77) minrectval('p_2','petal_width',18,23) outliercount(8) overlapcount(0) impurecount(0)
+Answer: 12
+selattr('sepal_length') selattr('petal_width') rectinliercount('p_0',21) rectinliercount('p_1',19) rectinliercount('p_2',13) rectcluster('p_0','p_0') rectcluster('p_1','p_1') rectcluster('p_2','p_2') minrectval('p_0','sepal_length',49,63) minrectval('p_0','petal_width',10,19) minrectval('p_1','sepal_length',45,58) minrectval('p_1','petal_width',1,4) minrectval('p_2','sepal_length',64,77) minrectval('p_2','petal_width',18,23) outliercount(7) overlapcount(0) impurecount(0)
+Answer: 13
+selattr('sepal_length') selattr('petal_width') rectinliercount('p_0',22) rectinliercount('p_1',19) rectinliercount('p_2',13) rectcluster('p_0','p_0') rectcluster('p_1','p_1') rectcluster('p_2','p_2') minrectval('p_0','sepal_length',49,63) minrectval('p_0','petal_width',10,20) minrectval('p_1','sepal_length',45,58) minrectval('p_1','petal_width',1,4) minrectval('p_2','sepal_length',64,77) minrectval('p_2','petal_width',18,23) outliercount(6) overlapcount(0) impurecount(0)
+Answer: 14
+selattr('sepal_length') selattr('petal_width') rectinliercount('p_0',22) rectinliercount('p_1',19) rectinliercount('p_2',14) rectcluster('p_0','p_0') rectcluster('p_1','p_1') rectcluster('p_2','p_2') minrectval('p_0','sepal_length',49,63) minrectval('p_0','petal_width',10,20) minrectval('p_1','sepal_length',45,58) minrectval('p_1','petal_width',1,4) minrectval('p_2','sepal_length',64,79) minrectval('p_2','petal_width',18,23) outliercount(5) overlapcount(0) impurecount(0)
+Answer: 15
+selattr('sepal_length') selattr('petal_width') rectinliercount('p_0',22) rectinliercount('p_1',19) rectinliercount('p_2',15) rectcluster('p_0','p_0') rectcluster('p_1','p_1') rectcluster('p_2','p_2') minrectval('p_0','sepal_length',49,63) minrectval('p_0','petal_width',10,20) minrectval('p_1','sepal_length',45,58) minrectval('p_1','petal_width',1,4) minrectval('p_2','sepal_length',64,79) minrectval('p_2','petal_width',18,24) outliercount(4) overlapcount(0) impurecount(0)
+Answer: 16
+selattr('sepal_length') selattr('petal_length') rectinliercount('p_0',23) rectinliercount('p_1',19) rectinliercount('p_2',15) rectcluster('p_0','p_0') rectcluster('p_1','p_1') rectcluster('p_2','p_2') minrectval('p_0','sepal_length',49,70) minrectval('p_0','petal_length',35,50) minrectval('p_1','sepal_length',45,58) minrectval('p_1','petal_length',12,19) minrectval('p_2','sepal_length',64,79) minrectval('p_2','petal_length',51,69) outliercount(3) overlapcount(0) impurecount(0)
+Answer: 17
+selattr('sepal_length') selattr('petal_length') rectinliercount('p_0',23) rectinliercount('p_1',19) rectinliercount('p_2',15) rectcluster('p_0','p_0') rectcluster('p_1','p_1') rectcluster('p_2','p_2') minrectval('p_0','sepal_length',49,70) minrectval('p_0','petal_length',35,50) minrectval('p_1','sepal_length',45,58) minrectval('p_1','petal_length',12,19) minrectval('p_2','sepal_length',64,79) minrectval('p_2','petal_length',51,69) outliercount(3) overlapcount(0) impurecount(0)
+OPTIMUM FOUND
+
+Models       : 17+
+  Optimum    : yes
+  Optimal    : 1
+Calls        : 1
+Time         : 1.333s (Solving: 0.99s 1st Model: 0.02s Unsat: 0.00s)
+CPU Time     : 1.333s
+
+Choices      : 8132    
+Conflicts    : 4832     (Analyzed: 4831)
+Restarts     : 32       (Average: 150.97 Last: 112)
+Model-Level  : 20.5    
+Problems     : 2        (Average Length: 1.00 Splits: 0)
+Lemmas       : 4831     (Deleted: 0)
+  Binary     : 124      (Ratio:   2.57%)
+  Ternary    : 137      (Ratio:   2.84%)
+  Conflict   : 4831     (Average Length:   54.5 Ratio: 100.00%) 
+  Loop       : 0        (Average Length:    0.0 Ratio:   0.00%) 
+  Other      : 0        (Average Length:    0.0 Ratio:   0.00%) 
+Backjumps    : 4831     (Average:  1.63 Max:  45 Sum:   7892)
+  Executed   : 4830     (Average:  1.63 Max:  45 Sum:   7890 Ratio:  99.97%)
+  Bounded    : 1        (Average:  2.00 Max:   2 Sum:      2 Ratio:   0.03%)
+
+Rules        : 69497    (Original: 68143)
+  Choice     : 13      
+  Minimize   : 3       
+Atoms        : 18896   
+Bodies       : 17225    (Original: 17067)
+  Count      : 668      (Original: 703)
+Equivalences : 27571    (Atom=Atom: 1324 Body=Body: 514 Other: 25733)
+Tight        : Yes
+Variables    : 17565    (Eliminated:    0 Frozen: 12784)
+Constraints  : 116824   (Binary:  85.1% Ternary:   4.9% Other:  10.1%)
+
+asprin version 3.1.0
+Reading from ./asp/rectangles_cluster_adjust.lp ...
+Solving...
+Answer: 1
+selattr('sepal_length') selattr('petal_length') rectinliercount('p_1',1) rectinliercount('p_0',1) rectinliercount('p_2',5) rectcluster('p_1','p_1') rectcluster('p_0','p_0') rectcluster('p_2','p_2') minrectval('p_1','sepal_length',66,66) minrectval('p_1','petal_length',44,44) minrectval('p_0','sepal_length',48,48) minrectval('p_0','petal_length',19,19) minrectval('p_2','sepal_length',67,69) minrectval('p_2','petal_length',51,59) outliercount(53) overlapcount(0) impurecount(0)
+Answer: 2
+selattr('sepal_length') selattr('petal_length') rectinliercount('p_1',3) rectinliercount('p_0',1) rectinliercount('p_2',5) rectcluster('p_1','p_1') rectcluster('p_0','p_0') rectcluster('p_2','p_2') minrectval('p_1','sepal_length',60,63) minrectval('p_1','petal_length',43,45) minrectval('p_0','sepal_length',48,48) minrectval('p_0','petal_length',19,19) minrectval('p_2','sepal_length',67,69) minrectval('p_2','petal_length',51,59) outliercount(51) overlapcount(0) impurecount(0)
+Answer: 3
+selattr('sepal_length') selattr('petal_length') rectinliercount('p_1',3) rectinliercount('p_0',2) rectinliercount('p_2',5) rectcluster('p_1','p_1') rectcluster('p_0','p_0') rectcluster('p_2','p_2') minrectval('p_1','sepal_length',60,63) minrectval('p_1','petal_length',43,45) minrectval('p_0','sepal_length',54,54) minrectval('p_0','petal_length',17,17) minrectval('p_2','sepal_length',67,69) minrectval('p_2','petal_length',51,59) outliercount(50) overlapcount(0) impurecount(0)
+Answer: 4
+selattr('sepal_length') selattr('petal_length') rectinliercount('p_1',3) rectinliercount('p_0',3) rectinliercount('p_2',5) rectcluster('p_1','p_1') rectcluster('p_0','p_0') rectcluster('p_2','p_2') minrectval('p_1','sepal_length',60,63) minrectval('p_1','petal_length',43,45) minrectval('p_0','sepal_length',48,54) minrectval('p_0','petal_length',17,19) minrectval('p_2','sepal_length',67,69) minrectval('p_2','petal_length',51,59) outliercount(49) overlapcount(0) impurecount(0)
+Answer: 5
+selattr('sepal_length') selattr('petal_length') rectinliercount('p_1',6) rectinliercount('p_0',2) rectinliercount('p_2',5) rectcluster('p_1','p_1') rectcluster('p_0','p_0') rectcluster('p_2','p_2') minrectval('p_1','sepal_length',49,66) minrectval('p_1','petal_length',43,45) minrectval('p_0','sepal_length',54,54) minrectval('p_0','petal_length',17,17) minrectval('p_2','sepal_length',67,69) minrectval('p_2','petal_length',51,59) outliercount(47) overlapcount(0) impurecount(0)
+Answer: 6
+selattr('sepal_length') selattr('petal_length') rectinliercount('p_1',6) rectinliercount('p_0',3) rectinliercount('p_2',5) rectcluster('p_1','p_1') rectcluster('p_0','p_0') rectcluster('p_2','p_2') minrectval('p_1','sepal_length',49,66) minrectval('p_1','petal_length',43,45) minrectval('p_0','sepal_length',48,54) minrectval('p_0','petal_length',17,19) minrectval('p_2','sepal_length',67,69) minrectval('p_2','petal_length',51,59) outliercount(46) overlapcount(0) impurecount(0)
+Answer: 7
+selattr('sepal_length') selattr('petal_length') rectinliercount('p_1',18) rectinliercount('p_0',2) rectinliercount('p_2',5) rectcluster('p_1','p_1') rectcluster('p_0','p_0') rectcluster('p_2','p_2') minrectval('p_1','sepal_length',52,63) minrectval('p_1','petal_length',39,56) minrectval('p_0','sepal_length',54,54) minrectval('p_0','petal_length',17,17) minrectval('p_2','sepal_length',67,69) minrectval('p_2','petal_length',51,59) outliercount(35) overlapcount(0) impurecount(0)
+Answer: 8
+selattr('sepal_length') selattr('petal_length') rectinliercount('p_1',19) rectinliercount('p_0',2) rectinliercount('p_2',5) rectcluster('p_1','p_1') rectcluster('p_0','p_0') rectcluster('p_2','p_2') minrectval('p_1','sepal_length',49,63) minrectval('p_1','petal_length',39,56) minrectval('p_0','sepal_length',54,54) minrectval('p_0','petal_length',17,17) minrectval('p_2','sepal_length',67,69) minrectval('p_2','petal_length',51,59) outliercount(34) overlapcount(0) impurecount(0)
+Answer: 9
+selattr('sepal_length') selattr('petal_length') rectinliercount('p_1',2) rectinliercount('p_0',19) rectinliercount('p_2',8) rectcluster('p_1','p_2') rectcluster('p_0','p_0') rectcluster('p_2','p_2') minrectval('p_1','sepal_length',67,69) minrectval('p_1','petal_length',51,56) minrectval('p_0','sepal_length',45,58) minrectval('p_0','petal_length',12,19) minrectval('p_2','sepal_length',65,79) minrectval('p_2','petal_length',57,69) outliercount(31) overlapcount(0) impurecount(0)
+Answer: 10
+selattr('sepal_length') selattr('petal_length') rectinliercount('p_1',1) rectinliercount('p_0',19) rectinliercount('p_2',11) rectcluster('p_1','p_2') rectcluster('p_0','p_0') rectcluster('p_2','p_2') minrectval('p_1','sepal_length',69,69) minrectval('p_1','petal_length',51,51) minrectval('p_0','sepal_length',45,58) minrectval('p_0','petal_length',12,19) minrectval('p_2','sepal_length',64,79) minrectval('p_2','petal_length',56,69) outliercount(29) overlapcount(0) impurecount(0)
+Answer: 11
+selattr('sepal_length') selattr('petal_length') rectinliercount('p_1',1) rectinliercount('p_0',19) rectinliercount('p_2',13) rectcluster('p_1','p_2') rectcluster('p_0','p_0') rectcluster('p_2','p_2') minrectval('p_1','sepal_length',69,69) minrectval('p_1','petal_length',51,51) minrectval('p_0','sepal_length',45,58) minrectval('p_0','petal_length',12,19) minrectval('p_2','sepal_length',64,79) minrectval('p_2','petal_length',53,69) outliercount(27) overlapcount(0) impurecount(0)
+Answer: 12
+selattr('sepal_length') selattr('petal_length') rectinliercount('p_1',22) rectinliercount('p_0',18) rectinliercount('p_2',7) rectcluster('p_1','p_1') rectcluster('p_0','p_0') rectcluster('p_2','p_2') minrectval('p_1','sepal_length',49,63) minrectval('p_1','petal_length',35,56) minrectval('p_0','sepal_length',45,58) minrectval('p_0','petal_length',12,17) minrectval('p_2','sepal_length',64,69) minrectval('p_2','petal_length',53,57) outliercount(13) overlapcount(0) impurecount(0)
+Answer: 13
+selattr('sepal_length') selattr('petal_length') rectinliercount('p_1',21) rectinliercount('p_0',18) rectinliercount('p_2',14) rectcluster('p_1','p_1') rectcluster('p_0','p_0') rectcluster('p_2','p_2') minrectval('p_1','sepal_length',52,63) minrectval('p_1','petal_length',35,56) minrectval('p_0','sepal_length',45,58) minrectval('p_0','petal_length',12,17) minrectval('p_2','sepal_length',64,79) minrectval('p_2','petal_length',51,67) outliercount(7) overlapcount(0) impurecount(0)
+Answer: 14
+selattr('sepal_length') selattr('petal_length') rectinliercount('p_1',21) rectinliercount('p_0',18) rectinliercount('p_2',15) rectcluster('p_1','p_1') rectcluster('p_0','p_0') rectcluster('p_2','p_2') minrectval('p_1','sepal_length',52,63) minrectval('p_1','petal_length',35,56) minrectval('p_0','sepal_length',45,58) minrectval('p_0','petal_length',12,17) minrectval('p_2','sepal_length',64,79) minrectval('p_2','petal_length',51,69) outliercount(6) overlapcount(0) impurecount(0)
+Answer: 15
+selattr('sepal_length') selattr('petal_length') rectinliercount('p_1',22) rectinliercount('p_0',18) rectinliercount('p_2',15) rectcluster('p_1','p_1') rectcluster('p_0','p_0') rectcluster('p_2','p_2') minrectval('p_1','sepal_length',49,63) minrectval('p_1','petal_length',35,56) minrectval('p_0','sepal_length',45,58) minrectval('p_0','petal_length',12,17) minrectval('p_2','sepal_length',64,79) minrectval('p_2','petal_length',51,69) outliercount(5) overlapcount(0) impurecount(0)
+Answer: 16
+selattr('sepal_length') selattr('petal_length') rectinliercount('p_1',22) rectinliercount('p_0',19) rectinliercount('p_2',15) rectcluster('p_1','p_1') rectcluster('p_0','p_0') rectcluster('p_2','p_2') minrectval('p_1','sepal_length',49,63) minrectval('p_1','petal_length',35,56) minrectval('p_0','sepal_length',45,58) minrectval('p_0','petal_length',12,19) minrectval('p_2','sepal_length',64,79) minrectval('p_2','petal_length',51,69) outliercount(4) overlapcount(0) impurecount(0)
+Answer: 17
+selattr('sepal_length') selattr('petal_length') rectinliercount('p_1',23) rectinliercount('p_0',19) rectinliercount('p_2',15) rectcluster('p_1','p_1') rectcluster('p_0','p_0') rectcluster('p_2','p_2') minrectval('p_1','sepal_length',49,70) minrectval('p_1','petal_length',35,50) minrectval('p_0','sepal_length',45,58) minrectval('p_0','petal_length',12,19) minrectval('p_2','sepal_length',64,79) minrectval('p_2','petal_length',51,69) outliercount(3) overlapcount(0) impurecount(0)
+Answer: 18
+selattr('sepal_length') selattr('petal_length') rectinliercount('p_1',23) rectinliercount('p_0',19) rectinliercount('p_2',15) rectcluster('p_1','p_1') rectcluster('p_0','p_0') rectcluster('p_2','p_2') minrectval('p_1','sepal_length',49,70) minrectval('p_1','petal_length',35,50) minrectval('p_0','sepal_length',45,58) minrectval('p_0','petal_length',12,19) minrectval('p_2','sepal_length',64,79) minrectval('p_2','petal_length',51,69) outliercount(3) overlapcount(0) impurecount(0)
+OPTIMUM FOUND
+
+Models       : 18+
+  Optimum    : yes
+  Optimal    : 1
+Calls        : 1
+Time         : 0.411s (Solving: 0.07s 1st Model: 0.01s Unsat: 0.00s)
+CPU Time     : 0.411s
+
+Choices      : 1210    
+Conflicts    : 436      (Analyzed: 435)
+Restarts     : 4        (Average: 108.75 Last: 33)
+Model-Level  : 22.2    
+Problems     : 2        (Average Length: 1.00 Splits: 0)
+Lemmas       : 435      (Deleted: 0)
+  Binary     : 39       (Ratio:   8.97%)
+  Ternary    : 12       (Ratio:   2.76%)
+  Conflict   : 435      (Average Length:   35.2 Ratio: 100.00%) 
+  Loop       : 0        (Average Length:    0.0 Ratio:   0.00%) 
+  Other      : 0        (Average Length:    0.0 Ratio:   0.00%) 
+Backjumps    : 435      (Average:  2.54 Max:  32 Sum:   1106)
+  Executed   : 426      (Average:  2.50 Max:  32 Sum:   1088 Ratio:  98.37%)
+  Bounded    : 9        (Average:  2.00 Max:   2 Sum:     18 Ratio:   1.63%)
+
+Rules        : 69785    (Original: 68144)
+  Choice     : 13      
+  Minimize   : 3       
+Atoms        : 19039    (Original: 18895 Auxiliary: 144)
+Bodies       : 17441    (Original: 17046)
+  Count      : 662      (Original: 701)
+  Sum        : 0        (Original: 1)
+Equivalences : 33330    (Atom=Atom: 1561 Body=Body: 738 Other: 31031)
+Tight        : Yes
+Variables    : 11370    (Eliminated:    0 Frozen: 8976)
+Constraints  : 65021    (Binary:  85.7% Ternary:  10.2% Other:   4.1%)
+
+asprin version 3.1.0
+Reading from ./asp/rectangles_cluster_adjust.lp ...
+Solving...
+Traceback (most recent call last):
+  File "time_measures.py", line 70, in <module>
+    main()
+  File "time_measures.py", line 48, in main
+    beef(beefargs_free)
+  File "/home/trigork/Projects/asp/aspbeef/aspbeef.py", line 462, in main
+    solve_asprin(script, [asp_facts, asp_selected_parameters], options, report=show_report, noparse=args.noparse)
+  File "/home/trigork/Projects/asp/aspbeef/aspbeef.py", line 258, in solve_asprin
+    subprocess.run(["asprin", "./asp/"+asp_program+".lp", "./input/tmp_facts.lp"] + clingo_args)
+  File "/home/trigork/.conda/envs/asp/lib/python3.6/subprocess.py", line 425, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+  File "/home/trigork/.conda/envs/asp/lib/python3.6/subprocess.py", line 855, in communicate
+    self.wait()
+  File "/home/trigork/.conda/envs/asp/lib/python3.6/subprocess.py", line 1477, in wait
+    (pid, sts) = self._try_wait(0)
+  File "/home/trigork/.conda/envs/asp/lib/python3.6/subprocess.py", line 1424, in _try_wait
+    (pid, sts) = os.waitpid(self.pid, wait_flags)
+KeyboardInterrupt

@@ -5,6 +5,7 @@ import tempfile
 import json
 import warnings
 from subprocess import PIPE, Popen
+import subprocess
 from sys import argv
 from datetime import datetime
 import pandas as pd
@@ -243,37 +244,45 @@ def rules_to_text(rule_dict):
     return rulestr
     
 
-def solve_asprin(asp_program, asp_facts, clingo_args, report=False):
+def solve_asprin(asp_program, asp_facts, clingo_args, report=False, noparse=False, silent=False):
     program = ''
     with open("./asp/"+asp_program+".lp", 'r') as f:
         program = f.read()
     for fact in asp_facts:
         program += fact + " \n"
-    
-    with tempfile.NamedTemporaryFile() as temp_file:
-        temp_file.write(program.encode())
-        temp_file.flush()
-        process = Popen(["asprin", temp_file.name] + clingo_args, stdout=PIPE, stderr=PIPE)
-        parser = Popen(["./lib/asparser/asparser"], stdin=process.stdout, stdout=PIPE, stderr=PIPE)
-        while True:
-            line = parser.stdout.readline().rstrip()
-            if not line:
-                break
-            try:
-                parsed_line = line.decode('utf-8')
-                sol_data = json.loads(parsed_line)
-            except:
-                print(parsed_line)
-                print("Solver trace: " + process.stderr.readline().rstrip().decode('utf-8'))
-                break
-            print("FOUND SOLUTION #{0} ({1} / {2} / {3})".format(sol_data["solnum"],
-                sol_data["atoms"]["overlapcount"][0][0], sol_data["atoms"]["impurecount"][0][0],
-                sol_data["atoms"]["outliercount"][0][0]))
-            if "optimum" in sol_data.keys():
-                rules = build_rules(sol_data)
-                print(rules_to_text(rules))
-            if report:
-                build_asprin(sol_data)
+
+    if noparse:
+        with open("./input/tmp_facts.lp", "w") as f:
+            for fact in asp_facts:
+                f.write(fact + " ")
+        print(" ".join(["asprin", "./asp/"+asp_program+".lp", "./input/tmp_facts.lp"] + clingo_args))
+        subprocess.run(["asprin", "./asp/"+asp_program+".lp", "./input/tmp_facts.lp"] + clingo_args)
+    else:
+        with tempfile.NamedTemporaryFile() as temp_file:
+            temp_file.write(program.encode())
+            temp_file.flush()
+            process = Popen(["asprin", temp_file.name] + clingo_args, stdout=PIPE, stderr=PIPE)
+            parser = Popen(["./lib/asparser/asparser"], stdin=process.stdout, stdout=PIPE, stderr=PIPE)
+            while True:
+                line = parser.stdout.readline().rstrip()
+                if not line:
+                    break
+                try:
+                    parsed_line = line.decode('utf-8')
+                    sol_data = json.loads(parsed_line)
+                except:
+                    print(parsed_line)
+                    print("Solver trace: " + process.stderr.readline().rstrip().decode('utf-8'))
+                    break
+                if not silent:
+                    print("FOUND SOLUTION #{0} ({1} / {2} / {3})".format(sol_data["solnum"],
+                        sol_data["atoms"]["overlapcount"][0][0], sol_data["atoms"]["impurecount"][0][0],
+                        sol_data["atoms"]["outliercount"][0][0]))
+                    if "optimum" in sol_data.keys():
+                        rules = build_rules(sol_data)
+                        print(rules_to_text(rules))
+                if report:
+                    build_asprin(sol_data)
             
             
 def main(raw_args=None):
@@ -294,6 +303,9 @@ def main(raw_args=None):
     parser.add_argument('-ov', '--only-visualize', action='store_true', default=False, help="Reports dataset without calculating rectangles, for visualization")
     parser.add_argument('-a', '--approximate', action='store_true', default=False, help="Approximates rectangles to KMeans Clusters instead of finding pure clusters")
     parser.add_argument('-fr', '--fringe', type=float, default=0.5)
+    parser.add_argument('-st', '--stats', action='store_true', default=False, help="Shows grounding and solving stats")
+    parser.add_argument('-np', '--noparse', action='store_true', default=False, help="Don't use asparser when calling asprin")
+    parser.add_argument('-si', '--silent', action='store_true', default=False, help="Don't print")
 
     args = parser.parse_args(raw_args)
 
@@ -438,6 +450,9 @@ def main(raw_args=None):
     
     options += ['-c','selectcount=' + str(feature_count)]
 
+    if args.stats:
+        options += ['--stats']
+
     if show_report:
         init_directories()
         store_command(command)
@@ -447,7 +462,7 @@ def main(raw_args=None):
     else:
         script = 'rectangles_asprin'
     
-    solve_asprin(script, [asp_facts, asp_selected_parameters], options, report=show_report)
+    solve_asprin(script, [asp_facts, asp_selected_parameters], options, report=show_report, noparse=args.noparse, silent=args.silent)
     
     if show_report:
         build_report_index()
