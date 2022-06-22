@@ -13,7 +13,7 @@ lark==0.0.4
 lark-parser==0.7.7
 MarkupSafe==1.1.1
 matplotlib==3.1.1
-numpy==1.17.3
+numpy==1.22.0
 pandas==0.25.1
 ply==3.11
 pybison==0.2.7.post4
