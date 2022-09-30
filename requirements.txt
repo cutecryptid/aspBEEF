@@ -7,7 +7,7 @@ inputs==0.5
 iso8601==0.1.8
 itsdangerous==1.1.0
 Jinja2==2.10.1
-joblib==0.14.0
+joblib==1.2.0
 kiwisolver==1.1.0
 lark==0.0.4
 lark-parser==0.7.7
